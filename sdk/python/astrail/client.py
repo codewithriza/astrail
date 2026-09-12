@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import shlex
+from urllib.parse import urlsplit, quote
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -72,6 +73,10 @@ class AstrailClient:
             endpoint = f"{(base_url or '').rstrip('/')}/api/mcp/{server_id}"
         if not endpoint or not (endpoint.startswith("http://") or endpoint.startswith("https://")):
             raise ValueError("AstrailClient requires an endpoint or base_url + server_id.")
+        parsed = urlsplit(endpoint)
+        if not parsed.hostname or parsed.username or parsed.password or parsed.fragment or any(c.isspace() for c in endpoint) or "\\" in endpoint:
+            raise ValueError("Use an HTTP endpoint without credentials, whitespace, or fragments.")
+        _ = parsed.port  # Validate malformed and out-of-range port numbers.
         self.endpoint = endpoint
         self.api_key = api_key if api_key is not None else os.environ.get("ASTRAIL_API_KEY")
         self.timeout = timeout

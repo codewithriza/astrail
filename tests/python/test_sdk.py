@@ -84,6 +84,11 @@ class SdkTests(unittest.TestCase):
                 AstrailClient(endpoint="https://example.test/mcp").list_tools()
         self.assertEqual(raised.exception.status, 500)
 
+    def test_endpoint_validation(self):
+        for endpoint in ["https://", "https://user:pass@example.test", "https://example.test/#x", "https://bad host/mcp", "https://example.test:99999"]:
+            with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
+                AstrailClient(endpoint=endpoint)
+
 
 if __name__ == "__main__":
     unittest.main()
