@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "baseUrl": "../../.",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "outDir": "../../.tmp/p2-smoke"
+  },
+  "include": [
+    "../../scripts/smoke-p2-integration-reduction.ts"
+  ]
+}

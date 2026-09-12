@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "baseUrl": "../../.",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "outDir": "../../.tmp/launch-demo-smoke"
+  },
+  "include": [
+    "../../scripts/smoke-launch-demo.ts"
+  ]
+}
