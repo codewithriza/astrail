@@ -142,6 +142,13 @@ class SdkTests(unittest.TestCase):
             with self.assertRaises(AstrailError):
                 client.list_tools()
 
+    def test_error_response_ids_are_strict(self):
+        for request_id in [True, 1.0, 99]:
+            with patch("astrail.client._open_request", return_value=Response({"jsonrpc": "2.0", "id": request_id, "error": {"code": -32601, "message": "Missing"}})):
+                with self.assertRaises(AstrailError) as raised:
+                    AstrailClient(endpoint="https://example.test").initialize()
+                self.assertEqual(raised.exception.code, -32603)
+
 
 if __name__ == "__main__":
     unittest.main()

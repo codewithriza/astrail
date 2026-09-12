@@ -241,6 +241,8 @@ class AstrailClient:
             raise AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, status=status)
         if ("result" in payload) == ("error" in payload):
             raise AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, status=status)
+        if payload.get("jsonrpc") != "2.0" or type(payload.get("id")) is not int or payload["id"] != request_id:
+            raise AstrailError("Astrail returned a mismatched JSON-RPC response.", -32603, status=status)
         rpc_error = payload.get("error")
         if "error" in payload and (not isinstance(rpc_error, dict) or type(rpc_error.get("code")) is not int or not isinstance(rpc_error.get("message"), str)):
             raise AstrailError("Astrail returned an invalid JSON-RPC error.", -32603, status=status)
@@ -253,8 +255,6 @@ class AstrailClient:
             )
         if status >= 300:
             raise AstrailError(f"Astrail request failed with HTTP {status}.", status, status=status)
-        if payload.get("jsonrpc") != "2.0" or payload.get("id") != request_id:
-            raise AstrailError("Astrail returned a mismatched JSON-RPC response.", -32603, status=status)
         if "result" not in payload:
             raise AstrailError("Astrail returned an empty JSON-RPC result.", -32603, status=status)
         return payload["result"]
