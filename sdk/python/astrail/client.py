@@ -95,6 +95,10 @@ class AstrailClient:
         return list(result.get("tools", []))
 
     def search_tools(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
+        if type(limit) is not int or limit < 0:
+            raise ValueError("limit must be a non-negative integer.")
+        if limit == 0:
+            return []
         needle = query.strip().lower()
         tools = self.list_tools()
         if not needle:

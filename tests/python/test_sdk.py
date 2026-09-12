@@ -125,6 +125,14 @@ class SdkTests(unittest.TestCase):
         with patch.object(client, "get_tool", return_value={"name": "test", "inputSchema": {}}):
             self.assertEqual(client.tool_schema("test"), {})
 
+    def test_search_limit_validation(self):
+        client = AstrailClient(endpoint="https://example.test")
+        for limit in [-1, 0.5, True]:
+            with self.assertRaises(ValueError):
+                client.search_tools("", limit)
+        with patch.object(client, "list_tools", side_effect=AssertionError("unexpected fetch")):
+            self.assertEqual(client.search_tools("", 0), [])
+
 
 if __name__ == "__main__":
     unittest.main()
