@@ -70,7 +70,7 @@ class AstrailClient:
         headers: dict[str, str] | None = None,
     ):
         if endpoint is None and server_id:
-            endpoint = f"{(base_url or '').rstrip('/')}/api/mcp/{server_id}"
+            endpoint = f"{(base_url or '').rstrip('/')}/api/mcp/{quote(server_id, safe='')}"
         if not endpoint or not (endpoint.startswith("http://") or endpoint.startswith("https://")):
             raise ValueError("AstrailClient requires an endpoint or base_url + server_id.")
         parsed = urlsplit(endpoint)

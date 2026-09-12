@@ -89,6 +89,10 @@ class SdkTests(unittest.TestCase):
             with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
                 AstrailClient(endpoint=endpoint)
 
+    def test_server_id_is_a_single_path_segment(self):
+        client = AstrailClient(base_url="https://example.test/", server_id="team/a?b#c")
+        self.assertEqual(client.endpoint, "https://example.test/api/mcp/team%2Fa%3Fb%23c")
+
 
 if __name__ == "__main__":
     unittest.main()
