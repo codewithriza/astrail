@@ -80,3 +80,9 @@ test("malformed tool content produces a protocol error", () => {
     assert.throws(() => parseToolResult(result), error => error instanceof AstrailError && error.code === -32603);
   }
 });
+
+test("search validates limits without fetching unnecessary pages", async () => {
+  const client = new AstrailClient({ endpoint: "https://example.test", fetch: async () => { throw new Error("unexpected fetch"); } });
+  for (const limit of [-1, 0.5, NaN, Infinity]) await assert.rejects(client.searchTools("", limit), RangeError);
+  assert.deepEqual(await client.searchTools("", 0), []);
+});

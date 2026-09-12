@@ -137,6 +137,8 @@ export class AstrailClient {
   }
 
   async searchTools(query: string, limit = 10) {
+    if (!Number.isSafeInteger(limit) || limit < 0) throw new RangeError("limit must be a non-negative safe integer.");
+    if (limit === 0) return [];
     const needle = query.trim().toLowerCase();
     const tools = await this.listTools();
     if (!needle) return tools.slice(0, limit);
