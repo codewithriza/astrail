@@ -74,3 +74,9 @@ test("SDK rejects ambiguous results and malformed RPC errors", async () => {
     await assert.rejects(client.listTools(), error => error instanceof AstrailError && error.code === -32603);
   }
 });
+
+test("malformed tool content produces a protocol error", () => {
+  for (const result of [null, [], { content: {} }, { content: [null] }, { content: [{ type: "text", text: 1 }] }]) {
+    assert.throws(() => parseToolResult(result), error => error instanceof AstrailError && error.code === -32603);
+  }
+});

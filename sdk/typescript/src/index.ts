@@ -293,6 +293,12 @@ export class AstrailClient {
 }
 
 export function parseToolResult<T = unknown>(result: ToolCallResult): T {
+  if (!result || typeof result !== "object" || Array.isArray(result)
+    || (result.content !== undefined && (!Array.isArray(result.content)
+      || result.content.some((item) => !item || typeof item !== "object"
+        || (item.type === "text" && typeof item.text !== "string"))))) {
+    throw new AstrailError("Astrail returned an invalid tool result.", -32603);
+  }
   if (result.isError) {
     const text = result.content?.find((item) => item.type === "text")?.text;
     throw new AstrailError(text || "Astrail tool execution failed.", -32000, result);
