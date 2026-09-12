@@ -1,0 +1,89 @@
+import io
+import json
+import shlex
+from pathlib import Path
+import sys
+import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from threading import Thread
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "sdk" / "python"))
+from astrail.client import AstrailClient, AstrailError, parse_tool_result
+
+
+class Response(io.BytesIO):
+    status = 200
+
+    def __init__(self, payload):
+        super().__init__(json.dumps(payload).encode())
+
+
+class SdkTests(unittest.TestCase):
+    def test_failed_tool_does_not_unwrap_as_success(self):
+        result = {"isError": True, "content": [{"type": "text", "text": "Denied"}], "structuredContent": {"status": "denied"}}
+        with self.assertRaises(AstrailError) as raised:
+            parse_tool_result(result)
+        self.assertEqual(raised.exception.data, result)
+        self.assertEqual(parse_tool_result({"structuredContent": {"ok": True}}), {"ok": True})
+
+    def test_generated_curl_quotes_endpoint_without_embedding_key(self):
+        endpoint = "https://example.test/it's"
+        command = AstrailClient(endpoint=endpoint, api_key="not-for-output").curl_initialize()
+        self.assertEqual(shlex.split(command)[4], endpoint)
+        self.assertIn('-H "Authorization: Bearer $ASTRAIL_API_KEY"', command)
+        self.assertNotIn("not-for-output", command)
+
+    def test_raw_call_preserves_error_result(self):
+        result = {"isError": True, "content": [{"type": "text", "text": "Denied"}]}
+        with patch("astrail.client._open_request", return_value=Response({"jsonrpc": "2.0", "id": 1, "result": result})):
+            self.assertEqual(AstrailClient(endpoint="https://example.test/mcp").tools.raw("write"), result)
+
+    def test_mismatched_and_invalid_envelopes(self):
+        for payload in [None, [], {"jsonrpc": "2.0", "id": 99, "result": {}}]:
+            with self.subTest(payload=payload), patch("astrail.client._open_request", return_value=Response(payload)):
+                with self.assertRaises(AstrailError):
+                    AstrailClient(endpoint="https://example.test/mcp").list_tools()
+
+    def test_redirects_do_not_forward_credentials(self):
+        received = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_POST(self):
+                self.rfile.read(int(self.headers.get("Content-Length", "0")))
+                self.send_response(302)
+                self.send_header("Location", "/target")
+                self.end_headers()
+
+            def do_GET(self):
+                received.append(self.headers.get("Authorization"))
+                self.send_response(200)
+                self.end_headers()
+
+            def log_message(self, *args):
+                pass
+
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            client = AstrailClient(endpoint=f"http://127.0.0.1:{server.server_port}/redirect", api_key="test-key")
+            with self.assertRaises(AstrailError):
+                client.list_tools()
+            self.assertEqual(received, [])
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join()
+
+    def test_http_error_cannot_be_hidden_by_a_result_field(self):
+        error = HTTPError("https://example.test/mcp", 500, "Failure", {}, Response({"jsonrpc": "2.0", "id": 1, "result": {}}))
+        with patch("astrail.client._open_request", side_effect=error):
+            with self.assertRaises(AstrailError) as raised:
+                AstrailClient(endpoint="https://example.test/mcp").list_tools()
+        self.assertEqual(raised.exception.status, 500)
+
+
+if __name__ == "__main__":
+    unittest.main()
