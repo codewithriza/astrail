@@ -86,3 +86,15 @@ test("search validates limits without fetching unnecessary pages", async () => {
   for (const limit of [-1, 0.5, NaN, Infinity]) await assert.rejects(client.searchTools("", limit), RangeError);
   assert.deepEqual(await client.searchTools("", 0), []);
 });
+
+test("tool discovery follows cursors and rejects cycles", async () => {
+  const client = new AstrailClient({ endpoint: "https://example.test", fetch: async (_url, options) => {
+    const request = JSON.parse(options.body);
+    return Response.json({ jsonrpc: "2.0", id: request.id, result: request.params.cursor
+      ? { tools: [{ name: "second" }] } : { tools: [{ name: "first" }], nextCursor: "next" } });
+  } });
+  assert.deepEqual((await client.listTools()).map(tool => tool.name), ["first", "second"]);
+  const cyclic = new AstrailClient({ endpoint: "https://example.test", fetch: async (_url, options) =>
+    Response.json({ jsonrpc: "2.0", id: JSON.parse(options.body).id, result: { tools: [], nextCursor: "same" } }) });
+  await assert.rejects(cyclic.listTools(), /repeated/);
+});

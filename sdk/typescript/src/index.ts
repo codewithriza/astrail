@@ -132,8 +132,23 @@ export class AstrailClient {
   }
 
   async listTools() {
-    const result = await this.rpc<{ tools: McpTool[] }>("tools/list", {});
-    return result.tools;
+    const tools: McpTool[] = [];
+    const seen = new Set<string>();
+    let cursor: string | undefined;
+    for (let page = 0; page < 100; page += 1) {
+      const result = await this.rpc<{ tools: McpTool[]; nextCursor?: string }>("tools/list", cursor === undefined ? {} : { cursor });
+      if (!result || !Array.isArray(result.tools) || result.tools.some((tool) => !tool || typeof tool.name !== "string")) {
+        throw new AstrailError("Astrail returned an invalid tools page.", -32603);
+      }
+      tools.push(...result.tools);
+      if (result.nextCursor === undefined) return tools;
+      if (typeof result.nextCursor !== "string" || !result.nextCursor || seen.has(result.nextCursor)) {
+        throw new AstrailError("Astrail returned an invalid or repeated tools cursor.", -32603);
+      }
+      cursor = result.nextCursor;
+      seen.add(cursor);
+    }
+    throw new AstrailError("Tool discovery exceeded 100 pages.", -32603);
   }
 
   async searchTools(query: string, limit = 10) {
