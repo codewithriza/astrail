@@ -243,6 +243,11 @@ class AstrailClient:
 
 
 def parse_tool_result(result: dict[str, Any]) -> Any:
+    if not isinstance(result, dict):
+        raise AstrailError("Astrail returned an invalid tool result.", -32603)
+    content = result.get("content", [])
+    if not isinstance(content, list) or any(not isinstance(item, dict) or (item.get("type") == "text" and not isinstance(item.get("text"), str)) for item in content):
+        raise AstrailError("Astrail returned invalid tool content.", -32603)
     if result.get("isError"):
         message = next((item.get("text") for item in result.get("content", [])
                         if isinstance(item, dict) and item.get("type") == "text"), None)

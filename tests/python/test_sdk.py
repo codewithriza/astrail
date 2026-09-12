@@ -115,6 +115,11 @@ class SdkTests(unittest.TestCase):
                 with self.assertRaises(AstrailError):
                     AstrailClient(endpoint="https://example.test").initialize()
 
+    def test_malformed_tool_content(self):
+        for result in [None, [], {"content": {}}, {"content": [None]}, {"content": [{"type": "text", "text": 1}]}]:
+            with self.assertRaises(AstrailError):
+                parse_tool_result(result)
+
 
 if __name__ == "__main__":
     unittest.main()
