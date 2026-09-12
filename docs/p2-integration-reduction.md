@@ -1,6 +1,6 @@
 # P2 integration reduction
 
-Apply `neon-migration-p2-integration-reduction.sql` before enabling these controls in a persistent workspace.
+Apply `database/migrations/p2-integration-reduction.sql` before enabling these controls in a persistent workspace.
 
 ## Safe reconciliation
 

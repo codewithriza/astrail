@@ -10,6 +10,6 @@ The protected-resource document is at `/.well-known/oauth-protected-resource`. I
 
 ## Operations
 
-Apply `neon-migration-p1-control-plane.sql`. Runtime admission is coordinated by tenant, provider, and credential. The queue is capped at 20, waits at most five seconds with ten polls, supports cancellation, and retry budgets reset to 20/minute. Circuit state opens after five provider failures. Retry delay uses full jitter; writes remain single-attempt unless the policy opts in and a durable idempotency key is present.
+Apply `database/migrations/p1-control-plane.sql`. Runtime admission is coordinated by tenant, provider, and credential. The queue is capped at 20, waits at most five seconds with ten polls, supports cancellation, and retry budgets reset to 20/minute. Circuit state opens after five provider failures. Retry delay uses full jitter; writes remain single-attempt unless the policy opts in and a durable idempotency key is present.
 
 Provider lifecycle templates and health checks cover GitHub, Slack, Google, and Stripe. Health checks keep tokens server-side, detect upstream rejection, compare expected/granted scopes, show refresh degradation, and create alerts. Users revoke from Connections; workspace admins may use `POST /api/credentials/:id/admin-revoke`.

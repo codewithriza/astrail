@@ -330,7 +330,7 @@ async function main() {
     console.log("missing_columns:");
     for (const item of missingColumns) console.log(`- ${item.table}.${item.column}: ${item.error}`);
   }
-  console.log("next_action: Apply neon-schema.sql and the required Neon migrations, then rerun npm run verify:schema.");
+  console.log("next_action: Apply database/schema.sql and the required Neon migrations, then rerun npm run verify:schema.");
   process.exit(1);
 }
 

@@ -17,6 +17,6 @@ export async function GET(request: Request) {
   const { data, error } = await admin.from("x402_payment_receipts")
     .select("id,server_id,end_user_id,tool_name,trace_id,network,asset,amount,pay_to,status,transaction,settled_at,created_at,updated_at")
     .eq("server_id", serverId.data).eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
-  if (error) return NextResponse.json({ error: "Apply neon-migration-x402.sql before viewing receipts." }, { status: 503 });
+  if (error) return NextResponse.json({ error: "Apply database/migrations/x402.sql before viewing receipts." }, { status: 503 });
   return NextResponse.json({ receipts: data ?? [] });
 }

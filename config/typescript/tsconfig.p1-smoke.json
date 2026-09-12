@@ -6,9 +6,15 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "baseUrl": ".",
-    "paths": { "@/*": ["./*"] },
-    "outDir": ".tmp/integration-operations-smoke"
+    "baseUrl": "../../.",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "outDir": "../../.tmp/p1-smoke"
   },
-  "include": ["scripts/smoke-integration-operations.ts"]
+  "include": [
+    "../../scripts/smoke-p1-operations.ts"
+  ]
 }

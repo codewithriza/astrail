@@ -63,6 +63,22 @@ node bin/astrail.mjs tools list
 
 Use `node bin/astrail.mjs help` for calls, connector discovery, and the stdio bridge. See the [CLI guide](docs/CLI.md) for configuration and protocol limits. Public package releases are not yet available; run the CLI from this checkout.
 
+## Repository layout
+
+```text
+app/                 Next.js pages and API routes
+lib/                 Generation, authentication, and runtime logic
+components/          Shared UI components
+bin/                 CLI and transport helpers
+sdk/                 TypeScript and Python clients
+database/            Base schema and incremental migrations
+config/typescript/   Focused smoke-test compiler configurations
+tests/               Unit, SDK, and browser tests
+scripts/             Development and verification commands
+examples/            Runnable examples
+docs/                Setup and architecture guides
+```
+
 ## Development
 
 ```bash

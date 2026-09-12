@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   const { data, error } = await admin.from("x402_domain_verifications")
     .select("id,server_id,domain,status,verified_at,last_error,created_at,updated_at")
     .eq("server_id", serverId.data).eq("user_id", user.id).order("updated_at", { ascending: false });
-  if (error) return NextResponse.json({ error: "Apply neon-migration-x402.sql before configuring x402." }, { status: 503 });
+  if (error) return NextResponse.json({ error: "Apply database/migrations/x402.sql before configuring x402." }, { status: 503 });
   return NextResponse.json({
     eligible_domains: eligibleX402Domains(server as unknown as McpServer),
     verifications: data ?? [],
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     updated_at: new Date().toISOString(),
   }, { onConflict: "server_id,domain" })
     .select("id,domain,status,created_at,updated_at").single();
-  if (error || !data) return NextResponse.json({ error: "Could not create domain challenge. Apply neon-migration-x402.sql first." }, { status: 503 });
+  if (error || !data) return NextResponse.json({ error: "Could not create domain challenge. Apply database/migrations/x402.sql first." }, { status: 503 });
   return NextResponse.json({
     verification: data,
     challenge: {

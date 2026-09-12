@@ -1,10 +1,14 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { encoding: "utf8" }).split("\0").filter(Boolean);
 const read = path => readFileSync(path, "utf8");
+for (const file of readdirSync(".")) {
+  assert.ok(!file.endsWith(".sql"), "Keep SQL files under database/, not the root.");
+  assert.ok(!/^tsconfig\..+-smoke\.json$/.test(file), "Keep smoke compiler configs under config/typescript/.");
+}
 const pkg = JSON.parse(read("package.json"));
 const lock = JSON.parse(read("package-lock.json"));
 assert.match(pkg.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/, "Use a semantic package version.");

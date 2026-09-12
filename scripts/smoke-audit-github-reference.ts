@@ -10,7 +10,7 @@ assert.equal(integrity.manifest.signature_status, "signed");
 assert.equal(verifyAuditExportManifest(rows, integrity.manifest, integrity.signature).valid, true);
 assert.equal(verifyAuditExportManifest([{ ...rows[0], purpose: "tampered" }], integrity.manifest, integrity.signature).valid, false);
 
-const migration = readFileSync("neon-migration-audit-evidence-github-reference.sql", "utf8");
+const migration = readFileSync("database/migrations/audit-evidence-github-reference.sql", "utf8");
 for (const required of ["chain_tool_call_evidence", "tool_call_logs_append_only", "purge_audit_logs", "audit_legal_holds", "previous_event_hash", "event_hash"]) assert.ok(migration.includes(required));
 assert.match(migration, /raise exception 'tool_call_logs are append-only/);
 const runtimeRoute = readFileSync("app/api/mcp/[serverId]/route.ts", "utf8");

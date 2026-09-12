@@ -7,7 +7,7 @@ This script verifies the current demo path for Astrail as a hosted MCP gateway r
 Connect to the Neon branch and run:
 
 ```sql
--- Use the full contents of neon-migration-mcp-metadata.sql.
+-- Use the full contents of database/migrations/mcp-metadata.sql.
 ```
 
 This migration must create or update:

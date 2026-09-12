@@ -6,14 +6,15 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "../../.",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": [
+        "./*"
+      ]
     },
-    "outDir": ".tmp/google-discovery-smoke"
+    "outDir": "../../.tmp/launch-demo-smoke"
   },
   "include": [
-    "scripts/smoke-google-discovery-import.ts",
-    "scripts/smoke-graphql-import.ts"
+    "../../scripts/smoke-launch-demo.ts"
   ]
 }

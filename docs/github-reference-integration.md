@@ -10,7 +10,7 @@ GITHUB_TOOL_OAUTH_CLIENT_SECRET=...
 AUDIT_EXPORT_SIGNING_KEY=at-least-32-random-bytes
 ```
 
-Apply `neon-migration-composable-auth-lifecycle.sql` and `neon-migration-audit-evidence-github-reference.sql`.
+Apply `database/migrations/composable-auth-lifecycle.sql` and `database/migrations/audit-evidence-github-reference.sql`.
 
 ## Walkthrough
 

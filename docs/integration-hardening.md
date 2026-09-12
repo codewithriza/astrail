@@ -71,7 +71,7 @@ Tools are classified with an `action_level` (`read`, `draft`, `write`, `send`, `
 
 ## Migration
 
-Run `neon-migration-integration-hardening.sql` (idempotent). New log columns fall back to the legacy column set. Preview deployments without Neon use in-memory deduplication, while configured production storage fails closed if a durable idempotency claim is unavailable.
+Run `database/migrations/integration-hardening.sql` (idempotent). New log columns fall back to the legacy column set. Preview deployments without Neon use in-memory deduplication, while configured production storage fails closed if a durable idempotency claim is unavailable.
 
 ## Tests
 

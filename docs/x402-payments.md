@@ -12,7 +12,7 @@ Astrail supports x402 v2 without holding customer funds or wallet private keys. 
 6. Create the domain challenge, publish it at the shown HTTPS `.well-known` URL, then click **Verify**.
 7. Save integration operations.
 
-Apply `neon-migration-x402.sql` before enabling production payments.
+Apply `database/migrations/x402.sql` before enabling production payments.
 
 ## Runtime flow
 

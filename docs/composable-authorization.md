@@ -1,6 +1,6 @@
 # Composable authorization and OAuth lifecycle
 
-Run `neon-migration-composable-auth-lifecycle.sql` before enabling these features.
+Run `database/migrations/composable-auth-lifecycle.sql` before enabling these features.
 
 ## Authorization boundaries
 

@@ -6,9 +6,15 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "strict": true,
-    "baseUrl": ".",
-    "paths": { "@/*": ["./*"] },
-    "outDir": ".tmp/x402-smoke"
+    "baseUrl": "../../.",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "outDir": "../../.tmp/x402-smoke"
   },
-  "include": ["scripts/smoke-x402.ts"]
+  "include": [
+    "../../scripts/smoke-x402.ts"
+  ]
 }

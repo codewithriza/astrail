@@ -83,6 +83,12 @@ jobs:
           npm run smoke:integration-hardening
           npm run smoke:integration-operations
 
+      - name: MCP proxy and approval checks
+        timeout-minutes: 3
+        run: |
+          npm run smoke:mcp-proxy
+          npm run smoke:approvals
+
       - name: Code Mode and MCP evals
         timeout-minutes: 8
         run: |

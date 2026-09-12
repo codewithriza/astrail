@@ -22,7 +22,7 @@ OpenAPI / docs / imported MCP
 
 `app/api/mcp/` exposes the protocol routes. Runtime helpers in `lib/runtime/` apply network restrictions, permission checks, OAuth metadata, and execution policies. Hosted execution follows endpoint maps; generated source is an export artifact and is not evaluated in the application process.
 
-`lib/neon/` handles the current hosted persistence and authentication integration. SQL files at the root define the schema and incremental migrations. `lib/billing/` contains hosted plan and usage behavior; billing is still coupled to parts of the application.
+`lib/neon/` handles the current hosted persistence and authentication integration. `database/schema.sql` defines the schema; `database/migrations/` holds incremental migrations. Smoke-test compiler configurations live in `config/typescript/`. `lib/billing/` contains hosted plan and usage behavior; billing is still coupled to parts of the application.
 
 `app/dashboard/` and `components/` contain the user interface. `bin/astrail.mjs` provides the CLI and stdio bridge. `sdk/` and export helpers provide client artifacts. `scripts/smoke-*` contain focused checks; `tests/` contains browser tests.
 

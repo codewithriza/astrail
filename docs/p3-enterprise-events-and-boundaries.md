@@ -1,6 +1,6 @@
 # P2.4 and P3 operations
 
-Apply `neon-migration-p3-enterprise-events.sql` after the earlier migrations.
+Apply `database/migrations/p3-enterprise-events.sql` after the earlier migrations.
 
 ## Webhook operations
 

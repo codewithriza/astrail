@@ -35,25 +35,25 @@ The strongest validated wedge is third-party SaaS OAuth (GitHub, Slack, Google, 
 |---|---|---|
 | OpenAPI/GraphQL/Google Discovery to MCP | Parsing, endpoint maps, tool generation, dynamic catalog mode, Code Mode, SDK export, website inspection, and presets | `lib/openapi.ts`, `lib/generate-mcp.ts`, `lib/generation-pipeline.ts`, `lib/runtime/sdk-code-mode.ts` |
 | Context-efficient tool exposure | Large APIs use catalog/Code Mode; request bodies over 10 nested properties collapse to a compact object | `lib/generate-mcp.ts`, `lib/agent-tool-profile.ts` |
-| Per-user outbound OAuth | Authorization-code consent with state and S256 PKCE; credentials bind to server, end user, provider, and imported security scheme | `app/api/oauth/connect/route.ts`, `app/api/oauth/callback/route.ts`, `lib/oauth-connect.ts`, `neon-migration-oauth-provider-binding.sql` |
+| Per-user outbound OAuth | Authorization-code consent with state and S256 PKCE; credentials bind to server, end user, provider, and imported security scheme | `app/api/oauth/connect/route.ts`, `app/api/oauth/callback/route.ts`, `lib/oauth-connect.ts`, `database/migrations/oauth-provider-binding.sql` |
 | Encrypted credential vault | AES-GCM credential encryption; provider access, refresh, and client-secret material remains server-side | `lib/credentials.ts`, `app/api/credentials/*` |
 | Provider scope enforcement | Imported endpoint OAuth requirements are matched against the bound credential and granted scopes; missing scopes fail before provider execution | `lib/runtime/oauth-security.ts`, `lib/runtime/credential-loader.ts` |
 | Per-user credential isolation | End-user OAuth cannot fall back to a workspace OAuth identity; database ownership/RLS is present | `lib/runtime/credential-loader.ts`, credential migrations |
 | Refresh rotation persistence | Rotated access and refresh tokens are encrypted and stored together; permanent refresh errors mark reconnect required | `lib/credentials.ts`, `lib/runtime/credential-loader.ts` |
-| Cross-instance refresh coordination | Database refresh leases allow one worker to refresh while peers wait and reread the credential; process-local single-flight also exists | `lib/runtime/credential-loader.ts`, `neon-migration-integration-operations.sql` |
-| Provider-side revocation | Trusted HTTPS revocation paths, provider-specific handling, revocation state, retryable UI/API flow, and cleanup after failed storage | `lib/oauth-revocation.ts`, `app/api/credentials/[id]/route.ts`, `neon-migration-oauth-revocation-audit.sql` |
+| Cross-instance refresh coordination | Database refresh leases allow one worker to refresh while peers wait and reread the credential; process-local single-flight also exists | `lib/runtime/credential-loader.ts`, `database/migrations/integration-operations.sql` |
+| Provider-side revocation | Trusted HTTPS revocation paths, provider-specific handling, revocation state, retryable UI/API flow, and cleanup after failed storage | `lib/oauth-revocation.ts`, `app/api/credentials/[id]/route.ts`, `database/migrations/oauth-revocation-audit.sql` |
 | Inbound Astrail API-key identity | Hashed, one-time-display keys can bind an end-user ID and actor role; caller headers cannot override a bound identity | `lib/api-keys.ts`, `app/api/apikeys/route.ts`, `app/api/mcp/[serverId]/route.ts` |
 | Runtime permission policies | Read-only, allowed/blocked methods, resources, tools and action classes; role policies with read/draft/write/send/destructive ceilings | `lib/runtime/permissions.ts`, `app/api/policies/route.ts`, dashboard policies UI |
-| Human-in-the-loop approvals | Allow/approval/block tool policy; encrypted resumable arguments; expiring, one-time claimed decisions before upstream execution | `lib/runtime/tool-approvals.ts`, `app/api/approvals/*`, `neon-migration-executor-parity.sql` |
-| Write idempotency | Durable per-server/tool/key claims, duplicate replay, in-progress and in-doubt states, identity/policy fingerprinting | `lib/runtime/idempotency.ts`, `neon-migration-integration-operations.sql` |
-| Webhook verification and deduplication | Bounded bodies, HMAC verification, redacted stored headers, and unique endpoint/event IDs | `lib/webhook-security.ts`, `app/api/webhooks/*`, `neon-migration-integration-operations.sql` |
+| Human-in-the-loop approvals | Allow/approval/block tool policy; encrypted resumable arguments; expiring, one-time claimed decisions before upstream execution | `lib/runtime/tool-approvals.ts`, `app/api/approvals/*`, `database/migrations/executor-parity.sql` |
+| Write idempotency | Durable per-server/tool/key claims, duplicate replay, in-progress and in-doubt states, identity/policy fingerprinting | `lib/runtime/idempotency.ts`, `database/migrations/integration-operations.sql` |
+| Webhook verification and deduplication | Bounded bodies, HMAC verification, redacted stored headers, and unique endpoint/event IDs | `lib/webhook-security.ts`, `app/api/webhooks/*`, `database/migrations/integration-operations.sql` |
 | Reliability controls | Bounded retries, Retry-After handling, timeouts, rate limits, batch isolation, response cache, and a per-instance circuit breaker | `lib/runtime/execution-policy.ts`, `lib/runtime/execute-tool.ts`, `lib/runtime/rate-limit.ts`, `lib/runtime/circuit-breaker.ts`, `lib/runtime/batch.ts` |
 | Customer-specific field mapping | Declarative argument rename/default/drop/value maps and response rename/drop rules, without eval | `lib/runtime/field-mapping.ts`, server APIs and dashboard |
 | Audit attribution and export | Human-readable summaries, redacted arguments, user/role/API-key/client/credential attribution, traces, attempts, latency, status, search and CSV/JSON export | `app/api/mcp/[serverId]/route.ts`, `app/api/audit/export/route.ts`, audit dashboard, audit migrations |
 | Schema drift detection | Spec and endpoint fingerprints, scheduled checks, version history, change summaries, and re-import preserving tool policy | `lib/schema-drift.ts`, `lib/runtime/schema-diff.ts`, `app/api/cron/schema-watch/route.ts`, `app/api/servers/[id]/reimport/route.ts` |
 | Security boundary | Public/private tool filtering, provider-token non-forwarding, SSRF/DNS defenses, bounded payloads, redaction, CORS/origin controls, and credential ownership checks | `app/api/mcp/[serverId]/route.ts`, `lib/runtime/network-policy.ts`, `lib/runtime/permissions.ts`, `lib/origin-policy.ts` |
 | Memory separation | Runtime requests contain tool arguments and identity metadata; no centralized agent-memory subsystem exists | Architecture and runtime codebase |
-| Integration-cost tracking | Setup, maintenance, support, and custom-exception events and totals | `app/api/integration-costs/route.ts`, `neon-migration-integration-operations.sql` |
+| Integration-cost tracking | Setup, maintenance, support, and custom-exception events and totals | `app/api/integration-costs/route.ts`, `database/migrations/integration-operations.sql` |
 
 ### 4.2 Partial capabilities
 
@@ -89,7 +89,7 @@ The strongest validated wedge is third-party SaaS OAuth (GitHub, Slack, Google, 
 
 #### Goal P0.1: Proactive, concurrency-safe token lifecycle
 
-**Status: implemented on 18 July 2026.** See `neon-migration-composable-auth-lifecycle.sql`, `lib/runtime/token-lifecycle.ts`, the refresh engine in `lib/runtime/credential-loader.ts`, `/dashboard/authorization`, and `npm run smoke:composable-auth`.
+**Status: implemented on 18 July 2026.** See `database/migrations/composable-auth-lifecycle.sql`, `lib/runtime/token-lifecycle.ts`, the refresh engine in `lib/runtime/credential-loader.ts`, `/dashboard/authorization`, and `npm run smoke:composable-auth`.
 
 Deliver a provider-neutral lifecycle engine that can be demonstrated under concurrency.
 
@@ -122,7 +122,7 @@ Acceptance criteria:
 
 #### Goal P0.3: Intent-linked, tamper-evident audit
 
-**Status: implemented on 18 July 2026.** See `neon-migration-audit-evidence-github-reference.sql`, `lib/audit-integrity.ts`, enriched MCP evidence logging, legal-hold/retention APIs, signed audit exports and verification, the audit dashboard, and `npm run smoke:audit-github`.
+**Status: implemented on 18 July 2026.** See `database/migrations/audit-evidence-github-reference.sql`, `lib/audit-integrity.ts`, enriched MCP evidence logging, legal-hold/retention APIs, signed audit exports and verification, the audit dashboard, and `npm run smoke:audit-github`.
 
 Answer the prospect’s central question: “What did the agent do with access, and why was it allowed?”
 
@@ -164,7 +164,7 @@ Acceptance criteria:
 
 #### Goal P1.2: Distributed reliability control plane
 
-**Status: implemented on 18 July 2026.** See `neon-migration-p1-control-plane.sql`, `lib/runtime/reliability-control-plane.ts`, full-jitter execution policy, `/dashboard/reliability`, and `npm run smoke:p1`.
+**Status: implemented on 18 July 2026.** See `database/migrations/p1-control-plane.sql`, `lib/runtime/reliability-control-plane.ts`, full-jitter execution policy, `/dashboard/reliability`, and `npm run smoke:p1`.
 
 - Add full-jitter retry policies and per-provider retry budgets.
 - Coordinate rate limits and circuit state across instances by tenant, provider, and credential.
@@ -185,7 +185,7 @@ Acceptance criteria:
 
 #### Goal P2.1: Safe schema reconciliation
 
-**Status: implemented on 18 July 2026.** See the reconciliation classifier/preview in `lib/runtime/schema-diff.ts`, versioned apply/rollback and decision audit in `/api/servers/[id]/reimport`, `neon-migration-p2-integration-reduction.sql`, and `npm run smoke:p2`.
+**Status: implemented on 18 July 2026.** See the reconciliation classifier/preview in `lib/runtime/schema-diff.ts`, versioned apply/rollback and decision audit in `/api/servers/[id]/reimport`, `database/migrations/p2-integration-reduction.sql`, and `npm run smoke:p2`.
 
 - Classify drift as additive, compatible, conditionally compatible, or breaking.
 - Auto-apply only proven-safe additive changes.

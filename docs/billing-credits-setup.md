@@ -37,11 +37,11 @@ Not charged:
 
 ## Required Neon Tables
 
-Apply `neon-schema.sql` to Neon. If you already ran the older runtime schema, also run:
+Apply `database/schema.sql` to Neon. If you already ran the older runtime schema, also run:
 
 ```bash
-neon-migration-billing.sql
-neon-migration-hosted-endpoint-limits.sql
+database/migrations/billing.sql
+database/migrations/hosted-endpoint-limits.sql
 ```
 
 Then verify:

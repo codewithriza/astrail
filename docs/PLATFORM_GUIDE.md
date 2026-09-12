@@ -260,11 +260,11 @@ The glue work that usually eats integration time is runtime configuration in Ast
 - **Human-readable audit logs**: every call logs `end_user_id`, `actor_role`, the verified Astrail API key, reported agent client, exact provider credential reference, secret-redacted arguments, trace ID, and a plain-English `summary` sentence.
 - **Schema migration**: `POST /api/servers/:id/reimport` regenerates a server from its updated contract on the same endpoint, returns an added/removed/changed/breaking diff (with `dry_run` preview), carries per-tool policies over, and snapshots the previous schema for history.
 
-Requires `neon-migration-integration-hardening.sql`; the runtime degrades gracefully when the migration has not run.
+Requires `database/migrations/integration-hardening.sql`; the runtime degrades gracefully when the migration has not run.
 
 Successful GET responses are cached in the gateway for a short TTL (default 30s, `ASTRAIL_RUNTIME_RESPONSE_CACHE_TTL_MS`) so repeated agent reads do not hammer upstream APIs. Cache keys include the credential identity, so per-end-user tokens never share cached bodies. Disable with `ASTRAIL_RUNTIME_RESPONSE_CACHE=off`.
 
-Every tool call log row carries a plain-English `summary` ("`get_contacts` called GET /contacts successfully (HTTP 200) in 340ms") so audit trails read without decoding status enums. `/dashboard/audit` shows and filters the complete attribution fields, and `/api/audit/export` returns the same redacted records as CSV or JSON (requires `neon-migration-runtime-quality.sql` and `neon-migration-oauth-revocation-audit.sql`).
+Every tool call log row carries a plain-English `summary` ("`get_contacts` called GET /contacts successfully (HTTP 200) in 340ms") so audit trails read without decoding status enums. `/dashboard/audit` shows and filters the complete attribution fields, and `/api/audit/export` returns the same redacted records as CSV or JSON (requires `database/migrations/runtime-quality.sql` and `database/migrations/oauth-revocation-audit.sql`).
 
 ## Hosted OAuth Connect
 
@@ -278,7 +278,7 @@ Astrail runs the OAuth authorization-code dance so users never handle raw tokens
 
 Credentials can be scoped to an end user: pass `end_user_id` when connecting, then create an Astrail API key scoped to the same end-user ID. MCP callers may send `x-astrail-end-user` and `x-astrail-actor-role`, but both must match the authenticated API key scope; callers cannot self-assign identities or privileges. An end-user OAuth call requires that user's matching provider grant and never falls back to a workspace-wide OAuth identity. Shared API keys and bearer credentials remain available for service-style integrations. Requires the OAuth and integration-operations migrations.
 
-When upgrading an existing workspace, run `neon-migration-oauth-provider-binding.sql` and `neon-migration-oauth-revocation-audit.sql`, re-import each OAuth-backed API so its endpoint map records the spec's OAuth scheme types, then reconnect legacy grants that have no authoritative recorded scopes. New grants bind to a fingerprint of the exact OAuth scheme, provider endpoints, revocation endpoint, and API origin so tokens cannot cross providers after a contract change. Revoking a connection calls the provider first and removes local ciphertext only after provider success; failed revocations remain visible and retryable. If a server declares multiple OAuth schemes, pass `security_scheme` to `/api/oauth/connect`; single-scheme servers infer it after re-import. Known providers enforce approved OAuth hosts. Custom providers display their trusted origins and require explicit confirmation.
+When upgrading an existing workspace, run `database/migrations/oauth-provider-binding.sql` and `database/migrations/oauth-revocation-audit.sql`, re-import each OAuth-backed API so its endpoint map records the spec's OAuth scheme types, then reconnect legacy grants that have no authoritative recorded scopes. New grants bind to a fingerprint of the exact OAuth scheme, provider endpoints, revocation endpoint, and API origin so tokens cannot cross providers after a contract change. Revoking a connection calls the provider first and removes local ciphertext only after provider success; failed revocations remain visible and retryable. If a server declares multiple OAuth schemes, pass `security_scheme` to `/api/oauth/connect`; single-scheme servers infer it after re-import. Known providers enforce approved OAuth hosts. Custom providers display their trusted origins and require explicit confirmation.
 
 For same-tenant internal APIs, keep audience validation and on-behalf-of token exchange in the MCP resource server that owns those identity app registrations. Astrail's primary OAuth value is third-party SaaS where internal OBO cannot produce a Slack, Google, GitHub, Stripe, HubSpot, or Salesforce token and every provider needs its own per-user consent and token lifecycle. See `/docs/third-party-saas-oauth`.
 
@@ -433,7 +433,7 @@ Every successful generation attempts to persist:
 
 Diagnostics include input/discovered URLs, discovery method, spec size, endpoint count, selected group, generated tool count, hosted endpoint, warnings, errors, timestamps, and raw discovery trace.
 
-Runtime execution writes best-effort `tool_call_logs` rows when the table exists. Logs include tool name, status, execution mode, method, path, upstream status, latency, trace ID, attempt count, error code, timestamp, and error text. Logging is intentionally non-blocking so MCP protocol responses continue even if observability storage is unavailable. If the live Neon branch has not applied the `tool_call_logs` migration yet, the runtime emits structured server logs with the same fields; apply `neon-migration-mcp-metadata.sql` to persist them in Postgres.
+Runtime execution writes best-effort `tool_call_logs` rows when the table exists. Logs include tool name, status, execution mode, method, path, upstream status, latency, trace ID, attempt count, error code, timestamp, and error text. Logging is intentionally non-blocking so MCP protocol responses continue even if observability storage is unavailable. If the live Neon branch has not applied the `tool_call_logs` migration yet, the runtime emits structured server logs with the same fields; apply `database/migrations/mcp-metadata.sql` to persist them in Postgres.
 
 Runtime traces include:
 
@@ -605,7 +605,7 @@ Generated SDK bundles include owned client code and package scaffolds for:
 - Public websites without specs can be converted into hosted browser-read MCP endpoints; private/local URLs and metadata IP ranges are blocked.
 - OAuth provider apps and least-privilege scopes must still be created and approved in each upstream provider.
 - Endpoint catalog add-to-gateway is implemented for authenticated users by cloning public server metadata into the user's gateway.
-- MCP composition has a minimal bundle runtime endpoint and dashboard page; bundle creation requires the Neon bundle tables from `neon-migration-mcp-metadata.sql`.
+- MCP composition has a minimal bundle runtime endpoint and dashboard page; bundle creation requires the Neon bundle tables from `database/migrations/mcp-metadata.sql`.
 - Cloudflare Worker support is manual export, not one-click deployment; its standalone executor intentionally supports only reviewed, unauthenticated HTTPS endpoint maps and fails closed for provider auth.
 - SDK package publishing is opt-in; generated package scaffolds require customer-owned package manager credentials.
 - Tool metadata editing updates the live hosted MCP catalog immediately; it does not regenerate the downloadable source snapshot.
@@ -681,7 +681,7 @@ DODO_PAYMENTS_WEBHOOK_KEY=
 
 ## Neon Schema Setup
 
-Apply `neon-schema.sql` to Neon PostgreSQL. The schema includes:
+Apply `database/schema.sql` to Neon PostgreSQL. The schema includes:
 
 - `profiles`
 - `mcp_servers`
@@ -704,13 +704,13 @@ Apply `neon-schema.sql` to Neon PostgreSQL. The schema includes:
 For existing Astrail databases:
 
 1. Connect to the target Neon branch.
-2. Apply `neon-migration-mcp-metadata.sql`.
-4. Run `neon-migration-executor-parity.sql`, `neon-migration-runtime-quality.sql`, `neon-migration-integration-hardening.sql`, and `neon-migration-runtime-origin.sql` in that order.
-5. Run `neon-migration-oauth-connect.sql`, `neon-migration-oauth-provider-binding.sql`, and `neon-migration-oauth-revocation-audit.sql` in that order.
-6. Run `neon-migration-integration-operations.sql`.
-7. Run `neon-migration-billing.sql`, then `neon-migration-hosted-endpoint-limits.sql` to enforce plan endpoint caps atomically.
-8. Run `neon-migration-design-partners.sql` if the design-partner intake is enabled.
-9. Run `neon-migration-x402.sql` before enabling caller-funded x402 payments, domain verification, spend limits, approvals, and receipts.
+2. Apply `database/migrations/mcp-metadata.sql`.
+4. Run `database/migrations/executor-parity.sql`, `database/migrations/runtime-quality.sql`, `database/migrations/integration-hardening.sql`, and `database/migrations/runtime-origin.sql` in that order.
+5. Run `database/migrations/oauth-connect.sql`, `database/migrations/oauth-provider-binding.sql`, and `database/migrations/oauth-revocation-audit.sql` in that order.
+6. Run `database/migrations/integration-operations.sql`.
+7. Run `database/migrations/billing.sql`, then `database/migrations/hosted-endpoint-limits.sql` to enforce plan endpoint caps atomically.
+8. Run `database/migrations/design-partners.sql` if the design-partner intake is enabled.
+9. Run `database/migrations/x402.sql` before enabling caller-funded x402 payments, domain verification, spend limits, approvals, and receipts.
 10. Verify locally:
 
 ```bash

@@ -166,7 +166,7 @@ export async function DELETE(request: Request, props: { params: Promise<{ id: st
       if (removed.error || !removed.data) return NextResponse.json({ error: removed.error?.message ?? "Could not remove this connection." }, { status: 500 });
       return NextResponse.json({ deleted: true, revoked: null });
     }
-    return NextResponse.json({ error: "Provider revocation requires neon-migration-oauth-revocation-audit.sql." }, { status: 503 });
+    return NextResponse.json({ error: "Provider revocation requires database/migrations/oauth-revocation-audit.sql." }, { status: 503 });
   }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!data) return NextResponse.json({ error: "Connection not found." }, { status: 404 });

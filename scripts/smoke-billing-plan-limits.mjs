@@ -22,10 +22,10 @@ const usagePages = [
   "app/dashboard/usage/page.tsx",
 ];
 const quotaMigrations = [
-  "neon-migration-hosted-endpoint-limits.sql",
+  "database/migrations/hosted-endpoint-limits.sql",
 ];
 const schemas = [
-  "neon-schema.sql",
+  "database/schema.sql",
 ];
 
 for (const path of planFiles) {

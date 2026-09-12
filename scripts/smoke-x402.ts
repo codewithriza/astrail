@@ -260,7 +260,7 @@ async function main() {
   } as McpServer);
   assert.deepEqual(domains, ["docs.example.com", "paid.example.com"]);
 
-  const migration = await readFile("neon-migration-x402.sql", "utf8");
+  const migration = await readFile("database/migrations/x402.sql", "utf8");
   assert.match(migration, /pg_advisory_xact_lock/);
   assert.match(migration, /idx_x402_receipts_network_fingerprint/);
   assert.match(migration, /x402_payment_challenges/);

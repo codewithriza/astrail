@@ -5,9 +5,9 @@ const read = (path) => readFileSync(path, "utf8");
 const serverRoute = read("app/api/mcp/[serverId]/route.ts");
 const bundleRoute = read("app/api/mcp/bundles/[bundleId]/route.ts");
 const exportRoute = read("app/api/audit/export/route.ts");
-const schema = read("neon-schema.sql");
+const schema = read("database/schema.sql");
 const auditPage = read("components/control-plane/AuditTimeline.tsx");
-const revocationMigration = read("neon-migration-oauth-revocation-audit.sql");
+const revocationMigration = read("database/migrations/oauth-revocation-audit.sql");
 const billingUsage = read("lib/billing/usage.ts");
 
 for (const field of ["end_user_id", "actor_role", "api_key_id", "api_key_name", "api_key_preview", "client_name", "credential_refs", "trace_id", "tool_name", "created_at"]) {

@@ -1,3 +1,10 @@
+# Repository layout cleanup
+
+- Move the base schema and 19 unchanged migrations into `database/`.
+- Move smoke-test compiler configurations into `config/typescript/` and update script paths.
+- Replace two obsolete smoke compiler configurations with the existing tsx runner; add their checks to CI.
+- Add a repository-layout guide and a check preventing SQL/test configuration clutter in the root.
+
 # 0.5.2 — Repository quality and CLI reliability
 
 - Fix CLI notification IDs, preserved upstream errors, empty HTTP failures, SSE parsing, and session headers.

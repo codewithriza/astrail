@@ -23,7 +23,7 @@ assert.ok(fraction >= 0.8 && fraction <= 0.9);
 const issuedAt = new Date(0).toISOString(), expiresAt = new Date(1000_000).toISOString();
 assert.equal(oauthRefreshDue({ credentialId: "credential-demo", issuedAt, expiresAt, originalTtlSeconds: 1000 }, 790_000), false);
 assert.equal(oauthRefreshDue({ credentialId: "credential-demo", issuedAt, expiresAt, originalTtlSeconds: 1000 }, 910_000), true);
-const migration = readFileSync("neon-migration-composable-auth-lifecycle.sql", "utf8");
+const migration = readFileSync("database/migrations/composable-auth-lifecycle.sql", "utf8");
 assert.match(migration, /refresh_generation = p_expected_generation/);
 assert.match(migration, /refresh_lease_id = p_lease_id and refresh_generation = p_expected_generation/);
 assert.match(migration, /coalesce\(p_refresh_token_ciphertext, refresh_token_ciphertext\)/);
