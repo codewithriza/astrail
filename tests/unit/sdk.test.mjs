@@ -49,3 +49,8 @@ test("SDK rejects unsafe endpoint syntax while allowing relative browser routes"
   for (const endpoint of ["https://user:pass@example.test", "//example.test/mcp", "https://example.test/#x", "https://bad host/mcp"]) assert.throws(() => new AstrailClient({ endpoint }));
   assert.ok(new AstrailClient({ endpoint: "/api/mcp/local" }));
 });
+
+test("SDK rejects timeouts that overflow or silently disable timers", () => {
+  for (const timeoutMs of [NaN, Infinity, -1, 2147483648]) assert.throws(() => new AstrailClient({ endpoint: "/api/mcp/x", timeoutMs }), RangeError);
+  assert.ok(new AstrailClient({ endpoint: "/api/mcp/x", timeoutMs: 0 }));
+});

@@ -112,6 +112,9 @@ export class AstrailClient {
     this.apiKey = options.apiKey ?? defaultApiKey();
     this.fetchImpl = options.fetch ?? fetch;
     this.timeoutMs = options.timeoutMs ?? 30_000;
+    if (!Number.isFinite(this.timeoutMs) || this.timeoutMs < 0 || this.timeoutMs > 2_147_483_647) {
+      throw new RangeError("timeoutMs must be finite and between 0 and 2147483647; 0 disables the deadline.");
+    }
     this.headers = options.headers ?? {};
     this.tools = {
       list: () => this.listTools(),
