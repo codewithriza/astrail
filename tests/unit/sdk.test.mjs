@@ -98,3 +98,9 @@ test("tool discovery follows cursors and rejects cycles", async () => {
     Response.json({ jsonrpc: "2.0", id: JSON.parse(options.body).id, result: { tools: [], nextCursor: "same" } }) });
   await assert.rejects(cyclic.listTools(), /repeated/);
 });
+
+test("error responses must match the request ID", async () => {
+  const client = new AstrailClient({ endpoint: "https://example.test", fetch: async () =>
+    Response.json({ jsonrpc: "2.0", id: 99, error: { code: -32601, message: "Missing" } }) });
+  await assert.rejects(client.initialize(), error => error.code === -32603);
+});

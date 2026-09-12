@@ -283,6 +283,9 @@ export class AstrailClient {
           || !Number.isInteger(payload.error.code) || typeof payload.error.message !== "string"))) {
         throw new AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, undefined, response.status);
       }
+      if (payload.jsonrpc !== "2.0" || payload.id !== id) {
+        throw new AstrailError("Astrail returned a mismatched JSON-RPC response.", -32603, undefined, response.status);
+      }
       if (!response.ok || payload.error) {
         throw new AstrailError(
           payload.error?.message ?? `Astrail request failed with HTTP ${response.status}.`,
@@ -290,9 +293,6 @@ export class AstrailClient {
           payload.error?.data,
           response.status,
         );
-      }
-      if (payload.jsonrpc !== "2.0" || payload.id !== id) {
-        throw new AstrailError("Astrail returned a mismatched JSON-RPC response.", -32603, undefined, response.status);
       }
       if (payload.result === undefined) {
         throw new AstrailError("Astrail returned an empty JSON-RPC result.", -32603, undefined, response.status);
