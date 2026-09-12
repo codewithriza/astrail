@@ -260,6 +260,12 @@ export class AstrailClient {
       if (!payload) {
         throw new AstrailError(`Astrail returned an empty response with HTTP ${response.status}.`, response.status, undefined, response.status);
       }
+      if (typeof payload !== "object" || Array.isArray(payload)
+        || (Object.hasOwn(payload, "result") === Object.hasOwn(payload, "error"))
+        || (Object.hasOwn(payload, "error") && (!payload.error || typeof payload.error !== "object"
+          || !Number.isInteger(payload.error.code) || typeof payload.error.message !== "string"))) {
+        throw new AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, undefined, response.status);
+      }
       if (!response.ok || payload.error) {
         throw new AstrailError(
           payload.error?.message ?? `Astrail request failed with HTTP ${response.status}.`,

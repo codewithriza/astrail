@@ -67,3 +67,10 @@ test("SDK normalizes and snapshots custom headers", async () => {
   assert.equal(sent.get("content-type"), "application/json");
   assert.equal(sent.get("x-trace"), "original");
 });
+
+test("SDK rejects ambiguous results and malformed RPC errors", async () => {
+  for (const fields of [{ result: {}, error: { code: -1, message: "bad" } }, { error: "bad" }, { error: {} }, { error: null }]) {
+    const client = new AstrailClient({ endpoint: "/api/mcp/x", fetch: async () => Response.json({ jsonrpc: "2.0", id: 1, ...fields }) });
+    await assert.rejects(client.listTools(), error => error instanceof AstrailError && error.code === -32603);
+  }
+});
