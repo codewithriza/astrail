@@ -102,6 +102,12 @@ export class AstrailClient {
     if (!endpoint || !(/^(https?:)?\/\//.test(endpoint) || endpoint.startsWith("/"))) {
       throw new Error("AstrailClient requires an endpoint or baseUrl + serverId.");
     }
+    const parsedEndpoint = new URL(endpoint, "http://localhost");
+    if (endpoint.startsWith("//") || !["http:", "https:"].includes(parsedEndpoint.protocol)
+      || parsedEndpoint.username || parsedEndpoint.password || parsedEndpoint.hash
+      || /[\s\\]/.test(endpoint)) {
+      throw new Error("Use an HTTP endpoint without credentials, whitespace, or fragments.");
+    }
     this.endpoint = endpoint;
     this.apiKey = options.apiKey ?? defaultApiKey();
     this.fetchImpl = options.fetch ?? fetch;

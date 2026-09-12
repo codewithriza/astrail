@@ -44,3 +44,8 @@ test("generated curl commands quote endpoints and expand the key environment var
   assert.ok(command.includes('-H "Authorization: Bearer $ASTRAIL_API_KEY"'));
   assert.ok(!command.includes("not-for-output"));
 });
+
+test("SDK rejects unsafe endpoint syntax while allowing relative browser routes", () => {
+  for (const endpoint of ["https://user:pass@example.test", "//example.test/mcp", "https://example.test/#x", "https://bad host/mcp"]) assert.throws(() => new AstrailClient({ endpoint }));
+  assert.ok(new AstrailClient({ endpoint: "/api/mcp/local" }));
+});
