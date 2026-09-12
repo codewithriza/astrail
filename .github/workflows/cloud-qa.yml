@@ -1,0 +1,138 @@
+name: Cloud QA
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloud-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify Astrail
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        timeout-minutes: 5
+        run: npm ci
+
+      - name: Repository consistency
+        run: npm run verify:repo
+
+      - name: Unit regressions
+        run: npm run test:unit
+
+      - name: Offline generation example
+        run: npm run demo:offline
+
+      - name: Audit production dependencies
+        timeout-minutes: 5
+        run: npm run audit:prod
+
+      - name: Lint
+        timeout-minutes: 5
+        run: npm run lint
+
+      - name: Typecheck
+        timeout-minutes: 5
+        run: npx tsc --noEmit --pretty false
+
+      - name: Production env readiness smoke
+        timeout-minutes: 2
+        run: npm run smoke:env-readiness
+
+      - name: Billing plan limits smoke
+        timeout-minutes: 2
+        run: npm run smoke:billing-plans
+
+      - name: Billing reset safety smoke
+        timeout-minutes: 2
+        run: npm run smoke:billing-reset
+
+      - name: Hosted MCP security smoke
+        timeout-minutes: 5
+        run: node scripts/smoke-mcp-endpoint-security.mjs
+
+      - name: OAuth and credential lifecycle smokes
+        timeout-minutes: 5
+        run: |
+          npm run smoke:oauth
+          npm run smoke:oauth-revocation
+
+      - name: Integration hardening and operations smokes
+        timeout-minutes: 8
+        run: |
+          npm run smoke:integration-hardening
+          npm run smoke:integration-operations
+
+      - name: MCP proxy and approval checks
+        timeout-minutes: 3
+        run: |
+          npm run smoke:mcp-proxy
+          npm run smoke:approvals
+
+      - name: Code Mode and MCP evals
+        timeout-minutes: 8
+        run: |
+          npm run smoke:code-mode
+          npm run eval:mcp
+
+      - name: Export, schema, and payment protocol smokes
+        timeout-minutes: 8
+        run: |
+          npm run smoke:x402
+          npm run smoke:cli
+          npm run smoke:sdk-edge
+          npm run smoke:schema-validation
+          npm run smoke:launch-demo
+
+      - name: Dashboard render and docs visibility smokes
+        timeout-minutes: 5
+        run: |
+          npm run smoke:dashboard-render
+          npm run smoke:search-docs
+
+      - name: Waitlist security smoke
+        timeout-minutes: 5
+        run: npm run smoke:waitlist-security
+
+      - name: Build
+        timeout-minutes: 8
+        run: npm run build
+
+      - name: Install Chromium for landing smoke
+        timeout-minutes: 12
+        run: npx playwright install --with-deps chromium
+
+      - name: Landing client examples and clipboard smoke
+        timeout-minutes: 3
+        run: |
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3000 > /tmp/astrail-next.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/ > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:3000/ > /dev/null
+          npm run smoke:landing-clients
