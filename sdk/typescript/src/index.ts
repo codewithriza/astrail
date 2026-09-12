@@ -115,7 +115,7 @@ export class AstrailClient {
     if (!Number.isFinite(this.timeoutMs) || this.timeoutMs < 0 || this.timeoutMs > 2_147_483_647) {
       throw new RangeError("timeoutMs must be finite and between 0 and 2147483647; 0 disables the deadline.");
     }
-    this.headers = options.headers ?? {};
+    this.headers = Object.fromEntries(new Headers(options.headers).entries());
     this.tools = {
       list: () => this.listTools(),
       search: (query, limit = 10) => this.searchTools(query, limit),

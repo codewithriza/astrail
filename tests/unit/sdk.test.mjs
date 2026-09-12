@@ -54,3 +54,16 @@ test("SDK rejects timeouts that overflow or silently disable timers", () => {
   for (const timeoutMs of [NaN, Infinity, -1, 2147483648]) assert.throws(() => new AstrailClient({ endpoint: "/api/mcp/x", timeoutMs }), RangeError);
   assert.ok(new AstrailClient({ endpoint: "/api/mcp/x", timeoutMs: 0 }));
 });
+
+test("SDK normalizes and snapshots custom headers", async () => {
+  const headers = { Authorization: "custom", "Content-Type": "text/plain", "X-Trace": "original" };
+  let sent;
+  const client = new AstrailClient({ endpoint: "/api/mcp/x", apiKey: "chosen", headers, fetch: async (_url, init) => {
+    sent = new Headers(init.headers); return Response.json({ jsonrpc: "2.0", id: 1, result: { tools: [] } });
+  } });
+  headers["X-Trace"] = "changed";
+  await client.listTools();
+  assert.equal(sent.get("authorization"), "Bearer chosen");
+  assert.equal(sent.get("content-type"), "application/json");
+  assert.equal(sent.get("x-trace"), "original");
+});
