@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","module":"Node16","moduleResolution":"Node16","esModuleInterop":true,"skipLibCheck":true,"strict":true,"baseUrl":".","paths":{"@/*":["./*"]},"outDir":".tmp/p3-smoke"},"include":["scripts/smoke-p3-enterprise-events.ts"]}

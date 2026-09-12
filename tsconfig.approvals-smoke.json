@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["./*"] },
+    "outDir": ".tmp/approvals-smoke"
+  },
+  "include": ["scripts/smoke-tool-approvals.ts"]
+}

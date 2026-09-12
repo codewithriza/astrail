@@ -1,0 +1,15 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#F9FAFB"/>
+  <rect x="70" y="70" width="1060" height="535" rx="34" fill="white" stroke="#E5E7EB" stroke-width="2"/>
+  <text x="112" y="156" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="54" font-weight="800">Website to MCP</text>
+  <text x="112" y="214" fill="#6B7280" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="27">Browser flows become agent-ready tools</text>
+  <rect x="120" y="298" width="365" height="210" rx="24" fill="#F3F4F6" stroke="#D1D5DB"/>
+  <rect x="145" y="325" width="315" height="42" rx="10" fill="white" stroke="#D1D5DB"/>
+  <circle cx="168" cy="346" r="7" fill="#F97316"/>
+  <rect x="145" y="392" width="220" height="24" rx="8" fill="#D1D5DB"/>
+  <rect x="145" y="435" width="270" height="24" rx="8" fill="#E5E7EB"/>
+  <rect x="608" y="298" width="365" height="210" rx="24" fill="#0A0A0A" stroke="#262626"/>
+  <text x="662" y="377" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="31" font-weight="800">MCP tools</text>
+  <text x="662" y="429" fill="#D4D4D4" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="23">search, inspect, act</text>
+  <path d="M508 403H588" stroke="#F97316" stroke-width="7" stroke-linecap="round"/>
+</svg>

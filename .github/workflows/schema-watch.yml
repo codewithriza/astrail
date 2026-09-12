@@ -1,0 +1,23 @@
+name: Astrail schema watch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: ${{ vars.ASTRAIL_SCHEMA_WATCH_URL != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Detect upstream schema drift
+        env:
+          ASTRAIL_SCHEMA_WATCH_URL: ${{ vars.ASTRAIL_SCHEMA_WATCH_URL }}
+          ASTRAIL_SCHEMA_WATCH_SECRET: ${{ secrets.ASTRAIL_SCHEMA_WATCH_SECRET }}
+        run: |
+          test -n "$ASTRAIL_SCHEMA_WATCH_SECRET"
+          curl --proto '=https' --max-time 60 --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $ASTRAIL_SCHEMA_WATCH_SECRET" \
+            "$ASTRAIL_SCHEMA_WATCH_URL"

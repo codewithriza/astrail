@@ -1,0 +1,8 @@
+Astrail open-source edition
+
+Derived from the Astrail codebase maintained by codewithriza.
+Original commit author names: findkeys, Riza Mohamed T, Riza.
+Source revision: b89ca3b156fcb670b708ec08eb649b92b3cb1679.
+The original repository is preserved separately as astrail-original.
+This repository starts from a cleaned source snapshot, without private Git history.
+Third-party dependencies remain subject to their respective licenses.

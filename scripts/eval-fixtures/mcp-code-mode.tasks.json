@@ -1,0 +1,117 @@
+{
+  "description": "Astrail local MCP eval tasks covering static tools, dynamic tools, and Code Mode without production secrets.",
+  "fixtures": {
+    "petstore": "scripts/eval-fixtures/petstore.openapi.json",
+    "helpdesk": "scripts/eval-fixtures/helpdesk.openapi.json"
+  },
+  "metrics": [
+    "completeness",
+    "efficiency_turn_count",
+    "unexpected_error_rate",
+    "latency_ms",
+    "deterministic_exactness"
+  ],
+  "tasks": [
+    {
+      "id": "static.helpdesk.list_tickets",
+      "mode": "static",
+      "fixture": "helpdesk",
+      "prompt": "List open support tickets assigned to u_123 with a limit of 2.",
+      "expected": {
+        "tool_hint": "list_tickets",
+        "status": "success",
+        "response.args.status": "open",
+        "response.args.assignee_id": "u_123",
+        "response.args.limit": "2"
+      }
+    },
+    {
+      "id": "static.helpdesk.validation",
+      "mode": "static",
+      "fixture": "helpdesk",
+      "prompt": "Try listing support tickets without the required status filter.",
+      "expected": {
+        "status": "validation_failed",
+        "error_code": "invalid_tool_arguments"
+      }
+    },
+    {
+      "id": "dynamic.helpdesk.catalog_invoke",
+      "mode": "dynamic",
+      "fixture": "helpdesk",
+      "prompt": "Discover the ticket-listing endpoint, inspect its schema, then invoke it for open tickets assigned to u_123.",
+      "expected": {
+        "catalog_match": "listTickets",
+        "schema_has": "status",
+        "response.args.status": "open",
+        "response.args.assignee_id": "u_123"
+      }
+    },
+    {
+      "id": "dynamic.helpdesk.invalid_arguments",
+      "mode": "dynamic",
+      "fixture": "helpdesk",
+      "prompt": "Discover the ticket-listing endpoint, then try invoking it with a non-numeric limit and verify validation blocks execution.",
+      "expected": {
+        "status": "validation_failed",
+        "error_code": "invalid_tool_arguments",
+        "issue_path": "limit"
+      }
+    },
+    {
+      "id": "static.helpdesk.auth_required",
+      "mode": "static",
+      "fixture": "helpdesk",
+      "prompt": "Call the sensitive ticket details endpoint without configured provider credentials and verify Astrail stops before upstream execution.",
+      "expected": {
+        "status": "auth_required",
+        "error_code": "auth_required",
+        "path": "/get/{ticket_id}/secret"
+      }
+    },
+    {
+      "id": "code.helpdesk.search_execute",
+      "mode": "code",
+      "fixture": "helpdesk",
+      "prompt": "Use Code Mode to search ticket docs, then execute the SDK method for open tickets assigned to u_123.",
+      "expected": {
+        "sdk_method": "client.tickets.listTickets",
+        "execution_strategy": "parallel_safe_reads",
+        "response.args.status": "open",
+        "response.args.assignee_id": "u_123"
+      }
+    },
+    {
+      "id": "code.petstore.public_demo",
+      "mode": "code",
+      "fixture": "petstore",
+      "prompt": "Use the public Petstore Code Mode demo to find and execute the store inventory read.",
+      "expected": {
+        "sdk_method": "client.store.getInventory",
+        "status": "success"
+      }
+    },
+    {
+      "id": "code.helpdesk.typecheck",
+      "mode": "code",
+      "fixture": "helpdesk",
+      "prompt": "Call an unknown SDK method and verify Astrail returns typecheck-style suggestions before upstream execution.",
+      "expected": {
+        "status": "mapping_required",
+        "error_code": "sdk_method_not_found",
+        "suggestions_include": "client.tickets.listTickets"
+      }
+    },
+    {
+      "id": "code.helpdesk.sandbox_runtime_block",
+      "mode": "code",
+      "fixture": "helpdesk",
+      "prompt": "Try direct fetch inside Code Mode and verify the sandbox rejects runtime network access before upstream execution.",
+      "expected": {
+        "status": "mapping_required",
+        "error_code": "sandbox_network_access_blocked",
+        "sdk_calls_found": 0
+      }
+    }
+  ]
+}

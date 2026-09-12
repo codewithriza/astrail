@@ -1,0 +1,8 @@
+.git
+.next
+node_modules
+.tmp
+.pnpm-store
+apps/agentgateway
+*.log
+.env*

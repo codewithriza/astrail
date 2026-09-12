@@ -1,0 +1,611 @@
+{
+  "generated_at": "2026-09-12T14:27:53.260Z",
+  "base_url": "http://localhost:3217",
+  "local_server_started": true,
+  "summary": {
+    "total_tasks": 9,
+    "passed_tasks": 9,
+    "failed_tasks": 0,
+    "completeness": 1,
+    "total_turns": 17,
+    "average_turns": 1.8888888888888888,
+    "total_latency_ms": 5131,
+    "average_latency_ms": 570,
+    "unexpected_error_rate": 0,
+    "deterministic_exactness_checks": 32,
+    "deterministic_exactness_observed_passes": 28
+  },
+  "results": [
+    {
+      "id": "static.helpdesk.list_tickets",
+      "mode": "static",
+      "fixture": "helpdesk",
+      "prompt": "List open support tickets assigned to u_123 with a limit of 2.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "tools/list succeeds",
+          "passed": true,
+          "details": null
+        },
+        {
+          "label": "generated static list ticket tool exists",
+          "passed": true,
+          "details": "acme_support_desk_eval_list_tickets"
+        },
+        {
+          "label": "tools/call returns HTTP 200",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "runtime status is success",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "status argument echoed exactly",
+          "passed": true,
+          "details": "open"
+        },
+        {
+          "label": "assignee argument echoed exactly",
+          "passed": true,
+          "details": "u_123"
+        },
+        {
+          "label": "limit argument echoed exactly",
+          "passed": true,
+          "details": "2"
+        }
+      ],
+      "metrics": {
+        "turns": 2,
+        "latency_ms": 673,
+        "generation_latency_ms": 235,
+        "deterministic_exactness_checks": 3,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "static.helpdesk.validation",
+      "mode": "static",
+      "fixture": "helpdesk",
+      "prompt": "Try listing support tickets without the required status filter.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "validation failure is represented as MCP tool result",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "MCP result is marked isError",
+          "passed": true,
+          "details": true
+        },
+        {
+          "label": "status is validation_failed",
+          "passed": true,
+          "details": "validation_failed"
+        },
+        {
+          "label": "error code is exact",
+          "passed": true,
+          "details": "invalid_tool_arguments"
+        },
+        {
+          "label": "missing status issue is reported",
+          "passed": true,
+          "details": [
+            {
+              "path": "status",
+              "code": "missing_required",
+              "message": "Missing required argument: status."
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "turns": 1,
+        "latency_ms": 12,
+        "deterministic_exactness_checks": 3,
+        "expected_errors": 1,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "dynamic.helpdesk.catalog_invoke",
+      "mode": "dynamic",
+      "fixture": "helpdesk",
+      "prompt": "Discover the ticket-listing endpoint, inspect its schema, then invoke it for open tickets assigned to u_123.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "catalog search succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "catalog returns endpoint id",
+          "passed": true,
+          "details": "acme_support_desk_eval_list_tickets"
+        },
+        {
+          "label": "catalog contains listTickets",
+          "passed": true,
+          "details": [
+            {
+              "endpoint_id": "acme_support_desk_eval_list_tickets",
+              "method": "GET",
+              "path": "/get",
+              "operation_id": "listTickets",
+              "summary": "List support tickets",
+              "description": "Find support tickets by status, assignee, customer, and page size. The eval uses Postman Echo so query arguments can be checked exactly.",
+              "resource": "tickets",
+              "tags": [
+                "tickets"
+              ],
+              "operation": "read",
+              "requires_auth": false
+            }
+          ]
+        },
+        {
+          "label": "schema lookup succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "schema exposes required status argument",
+          "passed": true,
+          "details": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "open",
+                  "pending",
+                  "closed"
+                ],
+                "example": "open",
+                "description": "Ticket status to filter by.",
+                "x-astrail-name": "status",
+                "x-astrail-in": "query",
+                "x-astrail-argument-name": "status"
+              },
+              "assignee_id": {
+                "type": "string",
+                "example": "u_123",
+                "description": "Support teammate assigned to the ticket.",
+                "x-astrail-name": "assignee_id",
+                "x-astrail-in": "query",
+                "x-astrail-argument-name": "assignee_id"
+              },
+              "customer_id": {
+                "type": "string",
+                "example": "cus_42",
+                "description": "Customer account id.",
+                "x-astrail-name": "customer_id",
+                "x-astrail-in": "query",
+                "x-astrail-argument-name": "customer_id"
+              },
+              "limit": {
+                "type": "integer",
+                "example": 2,
+                "description": "Maximum tickets to return.",
+                "x-astrail-name": "limit",
+                "x-astrail-in": "query",
+                "x-astrail-argument-name": "limit"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          }
+        },
+        {
+          "label": "dynamic invoke succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "dynamic status echoed exactly",
+          "passed": true,
+          "details": "open"
+        },
+        {
+          "label": "dynamic assignee echoed exactly",
+          "passed": true,
+          "details": "u_123"
+        },
+        {
+          "label": "dynamic limit echoed exactly",
+          "passed": true,
+          "details": "2"
+        }
+      ],
+      "metrics": {
+        "turns": 3,
+        "latency_ms": 384,
+        "generation_latency_ms": 10,
+        "deterministic_exactness_checks": 4,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "dynamic.helpdesk.invalid_arguments",
+      "mode": "dynamic",
+      "fixture": "helpdesk",
+      "prompt": "Discover the ticket-listing endpoint, then try invoking it with a non-numeric limit and verify validation blocks execution.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "catalog search succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "catalog returns endpoint id",
+          "passed": true,
+          "details": "acme_support_desk_eval_list_tickets"
+        },
+        {
+          "label": "invalid dynamic invoke returns HTTP 200 MCP result",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "invalid dynamic invoke is marked isError",
+          "passed": true,
+          "details": true
+        },
+        {
+          "label": "dynamic invalid status is validation_failed",
+          "passed": true,
+          "details": "validation_failed"
+        },
+        {
+          "label": "dynamic invalid error code is exact",
+          "passed": true,
+          "details": "invalid_tool_arguments"
+        },
+        {
+          "label": "dynamic invalid limit issue is exact",
+          "passed": true,
+          "details": [
+            {
+              "path": "limit",
+              "code": "invalid_type",
+              "message": "Expected integer, received string."
+            }
+          ]
+        }
+      ],
+      "metrics": {
+        "turns": 2,
+        "latency_ms": 17,
+        "generation_latency_ms": 10,
+        "deterministic_exactness_checks": 3,
+        "expected_errors": 1,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "static.helpdesk.auth_required",
+      "mode": "static",
+      "fixture": "helpdesk",
+      "prompt": "Call the sensitive ticket details endpoint without configured provider credentials and verify Astrail stops before upstream execution.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "generated sensitive ticket tool exists",
+          "passed": true,
+          "details": "acme_support_desk_eval_get_sensitive_ticket"
+        },
+        {
+          "label": "auth-required call returns HTTP 200 MCP result",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "auth-required call is marked isError",
+          "passed": true,
+          "details": true
+        },
+        {
+          "label": "status is auth_required",
+          "passed": true,
+          "details": "auth_required"
+        },
+        {
+          "label": "auth error code is exact",
+          "passed": true,
+          "details": "auth_required"
+        },
+        {
+          "label": "auth-required endpoint path is exact",
+          "passed": true,
+          "details": "/get/{ticket_id}/secret"
+        },
+        {
+          "label": "auth-required call has no upstream response",
+          "passed": true,
+          "details": null
+        }
+      ],
+      "metrics": {
+        "turns": 1,
+        "latency_ms": 8,
+        "generation_latency_ms": 235,
+        "deterministic_exactness_checks": 4,
+        "expected_errors": 1,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "code.helpdesk.search_execute",
+      "mode": "code",
+      "fixture": "helpdesk",
+      "prompt": "Use Code Mode to search ticket docs, then execute the SDK method for open tickets assigned to u_123.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "search_docs succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "docs include exact SDK method",
+          "passed": true,
+          "details": [
+            "client.tickets.listTickets",
+            "client.tickets.createTicket",
+            "client.tickets.getSensitiveTicket"
+          ]
+        },
+        {
+          "label": "execute succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "execute uses no-eval model",
+          "passed": true,
+          "details": {
+            "sdk_calls_found": 1,
+            "execution_model": "static-analysis-no-eval",
+            "sandbox": "No user JavaScript was evaluated.",
+            "execution_strategy": "parallel_safe_reads",
+            "control_flow": [
+              "direct_call"
+            ]
+          }
+        },
+        {
+          "label": "safe read strategy is parallel",
+          "passed": true,
+          "details": {
+            "sdk_calls_found": 1,
+            "execution_model": "static-analysis-no-eval",
+            "sandbox": "No user JavaScript was evaluated.",
+            "execution_strategy": "parallel_safe_reads",
+            "control_flow": [
+              "direct_call"
+            ]
+          }
+        },
+        {
+          "label": "executed SDK method is exact",
+          "passed": true,
+          "details": "client.tickets.listTickets"
+        },
+        {
+          "label": "Code Mode status echoed exactly",
+          "passed": true,
+          "details": "open"
+        },
+        {
+          "label": "Code Mode assignee echoed exactly",
+          "passed": true,
+          "details": "u_123"
+        }
+      ],
+      "metrics": {
+        "turns": 3,
+        "latency_ms": 1679,
+        "generation_latency_ms": 8,
+        "deterministic_exactness_checks": 5,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "code.petstore.public_demo",
+      "mode": "code",
+      "fixture": "petstore",
+      "prompt": "Use the public Petstore Code Mode demo to find and execute the store inventory read.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "metadata GET succeeds",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "metadata advertises Code Mode",
+          "passed": true,
+          "details": {
+            "hosted": true,
+            "deterministic_runtime": true,
+            "supports_code_mode": true,
+            "supports_tool_annotations": true,
+            "supports_runtime_permissions": true,
+            "supports_astrail_meta": true,
+            "supports_json_rpc_batch": true,
+            "supports_cors_preflight": true,
+            "supports_non_custodial_x402": false
+          }
+        },
+        {
+          "label": "Petstore docs include inventory method",
+          "passed": true,
+          "details": [
+            {
+              "sdk_method": "client.store.getInventory",
+              "endpoint_id": "petstore_openapi_server_get_inventory",
+              "http": "GET /store/inventory",
+              "method": "GET",
+              "path": "/store/inventory",
+              "resource": "store",
+              "operation": "read",
+              "summary": "List inventory",
+              "description": "Returns pet inventories by status from the sample Petstore API.",
+              "requires_auth": false,
+              "auth_schemes": [],
+              "tags": [
+                "store"
+              ],
+              "required_fields": [],
+              "arguments": [],
+              "pagination": null,
+              "response_hints": [],
+              "example": "const result = await client.store.getInventory({});",
+              "iterable_example": "const results = [];\nfor await (const item of client.store.getInventory({})) {\n  results.push(item);\n}\nreturn results;",
+              "score": 251,
+              "matched_terms": [
+                "inventory"
+              ],
+              "execution_notes": [
+                "Use only the returned client.resource.method shape with execute.",
+                "Astrail statically compiles supported SDK calls to endpoint-map execution; arbitrary JavaScript is not evaluated."
+              ]
+            }
+          ]
+        },
+        {
+          "label": "Petstore execute succeeds",
+          "passed": true,
+          "details": "success"
+        },
+        {
+          "label": "Petstore SDK method is exact",
+          "passed": true,
+          "details": "client.store.getInventory"
+        },
+        {
+          "label": "Petstore upstream output succeeds",
+          "passed": true,
+          "details": "success"
+        }
+      ],
+      "metrics": {
+        "turns": 3,
+        "latency_ms": 2275,
+        "deterministic_exactness_checks": 2,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "code.helpdesk.typecheck",
+      "mode": "code",
+      "fixture": "helpdesk",
+      "prompt": "Call an unknown SDK method and verify Astrail returns typecheck-style suggestions before upstream execution.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "typecheck result returns HTTP 200",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "unknown method is marked isError",
+          "passed": true,
+          "details": true
+        },
+        {
+          "label": "status is mapping_required",
+          "passed": true,
+          "details": "mapping_required"
+        },
+        {
+          "label": "exact error code is sdk_method_not_found",
+          "passed": true,
+          "details": "sdk_method_not_found"
+        },
+        {
+          "label": "suggestions include known listTickets method",
+          "passed": true,
+          "details": [
+            "client.tickets.createTicket",
+            "client.tickets.getSensitiveTicket",
+            "client.tickets.listTickets"
+          ]
+        }
+      ],
+      "metrics": {
+        "turns": 1,
+        "latency_ms": 39,
+        "deterministic_exactness_checks": 3,
+        "expected_errors": 1,
+        "unexpected_errors": 0
+      }
+    },
+    {
+      "id": "code.helpdesk.sandbox_runtime_block",
+      "mode": "code",
+      "fixture": "helpdesk",
+      "prompt": "Try direct fetch inside Code Mode and verify the sandbox rejects runtime network access before upstream execution.",
+      "passed": true,
+      "checks": [
+        {
+          "label": "sandbox denial returns HTTP 200 MCP result",
+          "passed": true,
+          "details": 200
+        },
+        {
+          "label": "sandbox denial is marked isError",
+          "passed": true,
+          "details": true
+        },
+        {
+          "label": "sandbox denial status is mapping_required",
+          "passed": true,
+          "details": "mapping_required"
+        },
+        {
+          "label": "sandbox denial finds zero SDK calls",
+          "passed": true,
+          "details": 0
+        },
+        {
+          "label": "sandbox diagnostic code is exact",
+          "passed": true,
+          "details": {
+            "code": "sandbox_network_access_blocked",
+            "message": "Direct network/runtime APIs are blocked. Use generated SDK methods instead.",
+            "severity": "error"
+          }
+        },
+        {
+          "label": "sandbox result error code is exact",
+          "passed": true,
+          "details": "sandbox_network_access_blocked"
+        },
+        {
+          "label": "sandbox confirms no JavaScript eval",
+          "passed": true,
+          "details": "No user JavaScript was evaluated."
+        }
+      ],
+      "metrics": {
+        "turns": 1,
+        "latency_ms": 44,
+        "generation_latency_ms": 8,
+        "deterministic_exactness_checks": 5,
+        "expected_errors": 1,
+        "unexpected_errors": 0
+      }
+    }
+  ]
+}

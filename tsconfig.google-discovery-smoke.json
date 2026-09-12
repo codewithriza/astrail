@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "outDir": ".tmp/google-discovery-smoke"
+  },
+  "include": [
+    "scripts/smoke-google-discovery-import.ts",
+    "scripts/smoke-graphql-import.ts"
+  ]
+}
