@@ -83,7 +83,7 @@ class AstrailClient:
         if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("timeout must be a finite positive number of seconds.")
         self.timeout = timeout
-        self.headers = headers or {}
+        self.headers = {key.lower(): value for key, value in (headers or {}).items()}
         self._next_id = 1
         self.tools = AstrailTools(self)
 

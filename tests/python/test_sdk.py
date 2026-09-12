@@ -98,6 +98,17 @@ class SdkTests(unittest.TestCase):
             with self.subTest(timeout=timeout), self.assertRaises(ValueError):
                 AstrailClient(endpoint="https://example.test", timeout=timeout)
 
+    def test_headers_are_copied_and_auth_has_precedence(self):
+        headers = {"Authorization": "custom", "Content-Type": "text/plain", "X-Trace": "original"}
+        client = AstrailClient(endpoint="https://example.test", api_key="chosen", headers=headers)
+        headers["X-Trace"] = "changed"
+        with patch("astrail.client._open_request", return_value=Response({"jsonrpc": "2.0", "id": 1, "result": {"tools": []}})) as opened:
+            client.list_tools()
+            sent = dict(opened.call_args.args[0].header_items())
+        self.assertEqual(sent["Authorization"], "Bearer chosen")
+        self.assertEqual(sent["Content-type"], "application/json")
+        self.assertEqual(sent["X-trace"], "original")
+
 
 if __name__ == "__main__":
     unittest.main()
