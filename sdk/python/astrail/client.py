@@ -116,7 +116,7 @@ class AstrailClient:
         tool = self.get_tool(name)
         if not tool:
             return None
-        return tool.get("inputSchema") or tool.get("input_schema")
+        return tool["inputSchema"] if tool.get("inputSchema") is not None else tool.get("input_schema")
 
     def call_tool(self, name: str, arguments: dict[str, Any] | None = None) -> Any:
         result = self.call_tool_raw(name, arguments)

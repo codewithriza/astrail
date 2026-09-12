@@ -120,6 +120,11 @@ class SdkTests(unittest.TestCase):
             with self.assertRaises(AstrailError):
                 parse_tool_result(result)
 
+    def test_empty_schema_is_preserved(self):
+        client = AstrailClient(endpoint="https://example.test")
+        with patch.object(client, "get_tool", return_value={"name": "test", "inputSchema": {}}):
+            self.assertEqual(client.tool_schema("test"), {})
+
 
 if __name__ == "__main__":
     unittest.main()
