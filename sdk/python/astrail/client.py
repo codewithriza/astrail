@@ -91,8 +91,22 @@ class AstrailClient:
         return self.rpc("initialize", {})
 
     def list_tools(self) -> list[dict[str, Any]]:
-        result = self.rpc("tools/list", {})
-        return list(result.get("tools", []))
+        tools = []
+        seen = set()
+        params = {}
+        for _ in range(100):
+            result = self.rpc("tools/list", params)
+            if not isinstance(result, dict) or not isinstance(result.get("tools"), list) or any(not isinstance(tool, dict) or not isinstance(tool.get("name"), str) for tool in result["tools"]):
+                raise AstrailError("Astrail returned an invalid tools page.", -32603)
+            tools.extend(result["tools"])
+            if "nextCursor" not in result:
+                return tools
+            cursor = result["nextCursor"]
+            if not isinstance(cursor, str) or not cursor or cursor in seen:
+                raise AstrailError("Astrail returned an invalid or repeated tools cursor.", -32603)
+            seen.add(cursor)
+            params = {"cursor": cursor}
+        raise AstrailError("Tool discovery exceeded 100 pages.", -32603)
 
     def search_tools(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         if type(limit) is not int or limit < 0:

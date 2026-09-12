@@ -133,6 +133,15 @@ class SdkTests(unittest.TestCase):
         with patch.object(client, "list_tools", side_effect=AssertionError("unexpected fetch")):
             self.assertEqual(client.search_tools("", 0), [])
 
+    def test_paginated_tools(self):
+        client = AstrailClient(endpoint="https://example.test")
+        with patch.object(client, "rpc", side_effect=[{"tools": [{"name": "one"}], "nextCursor": "next"}, {"tools": [{"name": "two"}]}]) as rpc:
+            self.assertEqual([t["name"] for t in client.list_tools()], ["one", "two"])
+            self.assertEqual(rpc.call_args.args, ("tools/list", {"cursor": "next"}))
+        with patch.object(client, "rpc", return_value={"tools": [], "nextCursor": "same"}):
+            with self.assertRaises(AstrailError):
+                client.list_tools()
+
 
 if __name__ == "__main__":
     unittest.main()
