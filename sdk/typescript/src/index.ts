@@ -209,9 +209,10 @@ export class AstrailClient {
 
   curlInitialize(options: { includeApiKeyEnv?: boolean } = {}) {
     const auth = options.includeApiKeyEnv ?? true
-      ? ` \\\n  -H 'Authorization: Bearer $ASTRAIL_API_KEY'`
+      ? ` \\\n  -H "Authorization: Bearer $ASTRAIL_API_KEY"`
       : "";
-    return `curl -sS -X POST '${this.endpoint}' \\\n  -H 'Content-Type: application/json'${auth} \\\n  --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'`;
+    const endpointArg = "'" + this.endpoint.replace(/'/g, "'\\''") + "'";
+    return `curl -sS -X POST ${endpointArg} \\\n  -H 'Content-Type: application/json'${auth} \\\n  --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'`;
   }
 
   async rpc<T>(method: string, params: Record<string, unknown>) {
@@ -226,6 +227,7 @@ export class AstrailClient {
     try {
       response = await this.fetchImpl(this.endpoint, {
         method: "POST",
+        redirect: "manual",
         headers: {
           ...this.headers,
           "content-type": "application/json",
@@ -239,6 +241,31 @@ export class AstrailClient {
         }),
         ...(controller ? { signal: controller.signal } : {}),
       });
+      const raw = await response.text();
+      let payload: JsonRpcResponse<T> | null = null;
+      try {
+        payload = raw ? JSON.parse(raw) as JsonRpcResponse<T> : null;
+      } catch {
+        throw new AstrailError(`Astrail returned a non-JSON response with HTTP ${response.status}.`, response.status, raw.slice(0, 500), response.status);
+      }
+      if (!payload) {
+        throw new AstrailError(`Astrail returned an empty response with HTTP ${response.status}.`, response.status, undefined, response.status);
+      }
+      if (!response.ok || payload.error) {
+        throw new AstrailError(
+          payload.error?.message ?? `Astrail request failed with HTTP ${response.status}.`,
+          payload.error?.code ?? response.status,
+          payload.error?.data,
+          response.status,
+        );
+      }
+      if (payload.jsonrpc !== "2.0" || payload.id !== id) {
+        throw new AstrailError("Astrail returned a mismatched JSON-RPC response.", -32603, undefined, response.status);
+      }
+      if (payload.result === undefined) {
+        throw new AstrailError("Astrail returned an empty JSON-RPC result.", -32603, undefined, response.status);
+      }
+      return payload.result;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         throw new AstrailError(`Astrail request timed out after ${this.timeoutMs}ms.`, -32000);
@@ -247,33 +274,14 @@ export class AstrailClient {
     } finally {
       if (timeout) clearTimeout(timeout);
     }
-
-    const raw = await response.text();
-    let payload: JsonRpcResponse<T> | null = null;
-    try {
-      payload = raw ? JSON.parse(raw) as JsonRpcResponse<T> : null;
-    } catch {
-      throw new AstrailError(`Astrail returned a non-JSON response with HTTP ${response.status}.`, response.status, raw.slice(0, 500), response.status);
-    }
-    if (!payload) {
-      throw new AstrailError(`Astrail returned an empty response with HTTP ${response.status}.`, response.status, undefined, response.status);
-    }
-    if (!response.ok || payload.error) {
-      throw new AstrailError(
-        payload.error?.message ?? `Astrail request failed with HTTP ${response.status}.`,
-        payload.error?.code ?? response.status,
-        payload.error?.data,
-        response.status,
-      );
-    }
-    if (payload.result === undefined) {
-      throw new AstrailError("Astrail returned an empty JSON-RPC result.", -32603, undefined, response.status);
-    }
-    return payload.result;
   }
 }
 
 export function parseToolResult<T = unknown>(result: ToolCallResult): T {
+  if (result.isError) {
+    const text = result.content?.find((item) => item.type === "text")?.text;
+    throw new AstrailError(text || "Astrail tool execution failed.", -32000, result);
+  }
   if (result.structuredContent !== undefined) return result.structuredContent as T;
   const content = Array.isArray(result.content) ? result.content : [];
   const text = content.find((item) => item.type === "text")?.text ?? "";

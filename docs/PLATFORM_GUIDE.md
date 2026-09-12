@@ -284,7 +284,7 @@ For same-tenant internal APIs, keep audience validation and on-behalf-of token e
 
 ## CLI and local bridge
 
-The CLI can discover and install hosted catalog connectors. `astrail connectors install <preset-id>` authenticates with the saved Astrail API key, clones the connector, and switches the CLI to the returned hosted endpoint. Provider credentials are attached through the hosted credential flow so they do not appear in shell history. See [Golden connectors](docs/golden-connectors.md).
+The CLI can discover and install hosted catalog connectors. `astrail connectors install <preset-id>` authenticates with the saved Astrail API key, clones the connector, and switches the CLI to the returned hosted endpoint. Provider credentials are attached through the hosted credential flow so they do not appear in shell history. See [Golden connectors](golden-connectors.md).
 
 The dependency-free CLI connects to any Astrail MCP endpoint and also exposes it as a local stdio MCP server:
 

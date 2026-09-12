@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 let observedTaskToken = null;
+const observedNotifications = [];
 const configHome = await mkdtemp(join(tmpdir(), "astrail-cli-smoke-"));
 
 const server = createServer(async (request, response) => {
@@ -33,6 +34,20 @@ const server = createServer(async (request, response) => {
   let body = "";
   for await (const chunk of request) body += chunk;
   const rpc = JSON.parse(body);
+  if (!Object.hasOwn(rpc, "id")) {
+    observedNotifications.push(rpc);
+    response.writeHead(202);
+    response.end();
+    return;
+  }
+  if (rpc.method === "test/http-error") {
+    response.writeHead(503); response.end(); return;
+  }
+  if (rpc.method === "test/rpc-error") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ jsonrpc: "2.0", id: rpc.id, error: { code: -32602, message: "Invalid params" } }));
+    return;
+  }
   const result = rpc.method === "initialize"
     ? { serverInfo: { name: "CLI smoke", version: "1" }, capabilities: { tools: {} } }
     : rpc.method === "tools/list"
@@ -74,6 +89,23 @@ try {
   assert.match(installed, /"installed": true/);
   assert.match(installed, /installed-github/);
   assert.match(await run(["mcp"], '{"jsonrpc":"2.0","id":7,"method":"tools/list","params":{}}\n'), /"id":7/);
+  const bridgeInput = [
+    { jsonrpc: "2.0", method: "notifications/initialized" },
+    { jsonrpc: "2.0", id: 0, method: "test/rpc-error" },
+    { jsonrpc: "2.0", id: "failed-request", method: "test/http-error" },
+  ].map(value => JSON.stringify(value)).join("\n") + "\nbroken-json\nnull\n";
+  const responses = (await run(["mcp"], bridgeInput)).trim().split("\n").map(line => JSON.parse(line));
+  assert.equal(observedNotifications.length, 1);
+  assert.equal(Object.hasOwn(observedNotifications[0], "id"), false);
+  assert.equal(responses.length, 4, "Notifications must not generate replies.");
+  assert.deepEqual(responses[0], { jsonrpc: "2.0", id: 0, error: { code: -32602, message: "Invalid params" } });
+  assert.equal(responses[1].id, "failed-request");
+  assert.match(responses[1].error.message, /HTTP 503/);
+  assert.equal(responses[2].error.code, -32700);
+  assert.equal(responses[3].error.code, -32600);
+  await assert.rejects(run(["call", "hello", "--args", "null"]), /JSON object/);
+  await assert.rejects(run(["call", "hello", "--args", "[]"]), /JSON object/);
+  await assert.rejects(run(["workspace", "use"]), /Workspace name/);
   console.log("PASS: Astrail CLI status, tool and connector discovery, call, resume, and stdio bridge.");
 } finally {
   server.close();

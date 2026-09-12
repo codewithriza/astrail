@@ -3,6 +3,7 @@
 node_modules
 .tmp
 .pnpm-store
-apps/agentgateway
 *.log
 .env*
+tests
+reports

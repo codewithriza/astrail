@@ -6,28 +6,16 @@ import { chmodSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-const argv = process.argv.slice(2);
+import { parseArguments, validateEndpoint } from "./lib/arguments.mjs";
+import { createMcpTransport } from "./lib/mcp-transport.mjs";
 
-function option(name, fallback) {
-  const index = argv.indexOf(`--${name}`);
-  return index >= 0 ? argv[index + 1] : fallback;
+let parsed;
+try { parsed = parseArguments(process.argv.slice(2)); } catch (error) {
+  process.stderr.write(`astrail: ${error.message}\n`);
+  process.exit(1);
 }
-
-function positional() {
-  const valueOptions = new Set(["endpoint", "api-key", "task-token", "args", "query", "execution-id"]);
-  const values = [];
-  for (let index = 0; index < argv.length; index += 1) {
-    const value = argv[index];
-    if (value.startsWith("--")) {
-      if (valueOptions.has(value.slice(2))) index += 1;
-      continue;
-    }
-    values.push(value);
-  }
-  return values;
-}
-
-const [command = "help", subcommand, name] = positional();
+const option = (name, fallback) => parsed.options[name] ?? fallback;
+const [command = "help", subcommand, name] = parsed.positional;
 const configPath = join(process.env.XDG_CONFIG_HOME || join(homedir(), ".config"), "astrail", "config.json");
 let diskConfig = {};
 try { diskConfig = JSON.parse(readFileSync(configPath, "utf8")); } catch {}
@@ -68,33 +56,18 @@ Environment: ASTRAIL_MCP_ENDPOINT, ASTRAIL_API_KEY, ASTRAIL_TASK_AUTHORIZATION
 
 function requireEndpoint() {
   if (!endpoint) throw new Error("Set --endpoint, ASTRAIL_MCP_ENDPOINT, or run `astrail login`.");
-  return new URL(endpoint).toString();
+  return validateEndpoint(endpoint);
+}
+
+let transport;
+function sendMessage(message) {
+  transport ??= createMcpTransport({ endpoint: requireEndpoint(), apiKey, taskToken });
+  return transport(message);
 }
 
 async function rpc(method, params = {}, id = 1) {
-  const response = await fetch(requireEndpoint(), {
-    method: "POST",
-    headers: {
-      accept: "application/json, text/event-stream",
-      "content-type": "application/json",
-      ...(apiKey ? { authorization: `Bearer ${apiKey}` } : {}),
-      ...(taskToken ? { "x-astrail-task-authorization": taskToken } : {}),
-    },
-    body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
-    redirect: "manual",
-    signal: AbortSignal.timeout(30_000),
-  });
-  const text = await response.text();
-  if (response.status === 204 || !text.trim()) return null;
-  let payload;
-  try {
-    payload = JSON.parse(text);
-  } catch {
-    const data = text.split(/\r?\n/).find((line) => line.startsWith("data:"));
-    if (!data) throw new Error(`MCP endpoint returned HTTP ${response.status} with a non-JSON body.`);
-    payload = JSON.parse(data.slice(5).trim());
-  }
-  if (!response.ok || payload.error) throw new Error(payload.error?.message ?? `MCP endpoint returned HTTP ${response.status}.`);
+  const payload = await sendMessage({ jsonrpc: "2.0", id, method, params });
+  if (payload.error) throw new Error(payload.error.message ?? "MCP request failed.");
   return payload;
 }
 
@@ -138,9 +111,11 @@ async function main() {
     const config = await activeConfig();
     const next = { ...config, endpoint: endpoint || config.endpoint, apiKey: apiKey || config.apiKey, workspace: option("workspace", config.workspace) };
     if (!next.endpoint || !next.apiKey) throw new Error("login requires --endpoint and --api-key. Tokens are stored with mode 0600.");
+    validateEndpoint(next.endpoint);
     await saveConfig(next); return print({ logged_in: true, endpoint: next.endpoint, workspace: next.workspace ?? null });
   }
   if (command === "workspace" && subcommand === "use") {
+    if (!name) throw new Error("Workspace name is required.");
     const config = await activeConfig(); await saveConfig({ ...config, endpoint: endpoint || config.endpoint, apiKey: apiKey || config.apiKey, workspace: name });
     return print({ workspace: name, configured: true });
   }
@@ -239,6 +214,7 @@ async function main() {
     const rawArgs = option("args", "{}");
     let args;
     try { args = JSON.parse(rawArgs); } catch { throw new Error("--args must be valid JSON."); }
+    if (!args || typeof args !== "object" || Array.isArray(args)) throw new Error("--args must be a JSON object.");
     return print((await rpc("tools/call", { name: subcommand, arguments: args })).result);
   }
   if (command === "resume") {
@@ -253,12 +229,26 @@ async function main() {
     const input = createInterface({ input: process.stdin, crlfDelay: Infinity });
     for await (const line of input) {
       if (!line.trim()) continue;
+      let request;
+      try { request = JSON.parse(line); } catch {
+        process.stdout.write(`${JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32700, message: "Invalid JSON." } })}\n`);
+        continue;
+      }
+      if (!request || Array.isArray(request) || request.jsonrpc !== "2.0" || typeof request.method !== "string"
+        || (Object.hasOwn(request, "id") && typeof request.id !== "string" && typeof request.id !== "number")) {
+        process.stdout.write(`${JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32600, message: "Invalid MCP request." } })}\n`);
+        continue;
+      }
       try {
-        const request = JSON.parse(line);
-        const response = await rpc(request.method, request.params ?? {}, request.id);
+        const response = await sendMessage(request);
         if (response) process.stdout.write(`${JSON.stringify(response)}\n`);
       } catch (error) {
-        process.stdout.write(`${JSON.stringify({ jsonrpc: "2.0", id: null, error: { code: -32603, message: error instanceof Error ? error.message : "CLI bridge error." } })}\n`);
+        const message = error instanceof Error ? error.message : "CLI bridge error.";
+        if (Object.hasOwn(request, "id")) {
+          process.stdout.write(`${JSON.stringify({ jsonrpc: "2.0", id: request.id, error: { code: -32603, message } })}\n`);
+        } else {
+          process.stderr.write(`astrail: ${message}\n`);
+        }
       }
     }
     return;

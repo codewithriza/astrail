@@ -46,7 +46,7 @@ Astrail is a Next.js hosted MCP platform. Users create MCP servers from OpenAPI 
 - Integration operations, webhook security, execution policy, schema drift, or batch-isolation changes: `npm run smoke:integration-operations`.
 - Code Mode changes: `npm run smoke:code-mode` and `npm run eval:mcp`.
 - Docs search or public endpoint visibility changes: `npm run smoke:search-docs`.
-- Billing changes: test checkout/webhook paths plus `npm run verify:schema` when Supabase is available.
+- Billing changes: test checkout/webhook paths plus `npm run verify:schema` when a disposable Neon database is configured.
 - Always run lint, typecheck, and build before pushing to `main`.
 
 ## Safe MCP Tool Instructions

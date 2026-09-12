@@ -1,6 +1,6 @@
 # Contributing to Astrail
 
-Start with `npm ci` on Node.js 22, then `npm run demo:offline`. The offline example is the shortest way to understand the generator without provisioning services.
+Start with `npm ci` on Node.js 22.18 or newer, then `npm run demo:offline`. The offline example is the shortest way to understand the generator without provisioning services.
 
 ## Pick a focused change
 
@@ -14,10 +14,13 @@ Keep pull requests focused. Explain the problem, resulting behavior, and how you
 npm run check
 ```
 
+`npm test` runs unit regressions and core smoke tests. `npm run verify:repo` checks versions, tracked environment files, script references, and local documentation links. CI also checks the CLI on Linux and Windows and builds the Docker image.
+
 Run additional checks for the area you changed:
 
 | Area | Checks |
 | --- | --- |
+| Python SDK | `python3 -m unittest discover -s tests/python -v` |
 | Runtime / authorization / network policy | `node scripts/smoke-mcp-endpoint-security.mjs` |
 | OAuth and credentials | `npm run smoke:oauth` and `npm run smoke:oauth-revocation` |
 | Mappings, retries, permissions | `npm run smoke:integration-hardening` |

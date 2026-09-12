@@ -1,6 +1,6 @@
 {
   "name": "astrail",
-  "version": "0.5.1.0",
+  "version": "0.5.2",
   "private": true,
   "bin": {
     "astrail": "bin/astrail.mjs"
@@ -65,7 +65,10 @@
     "typecheck": "tsc --noEmit --pretty false",
     "demo:offline": "tsx examples/openapi-to-tools/demo.ts",
     "test:core": "npm run demo:offline && npm run smoke:schema-validation && npm run smoke:cli && npm run smoke:billing-plans",
-    "check": "npm run lint && npm run typecheck && npm run test:core && npm run build"
+    "check": "npm run verify:repo && npm run lint && npm run typecheck && npm test && npm run build",
+    "test:unit": "tsx --test tests/unit/*.test.mjs",
+    "test": "npm run test:unit && npm run test:core",
+    "verify:repo": "node scripts/verify-repository.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",
@@ -123,7 +126,7 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=22.18.0"
   },
   "repository": {
     "type": "git",

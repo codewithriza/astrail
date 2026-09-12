@@ -117,3 +117,9 @@ The package SDK is the stable low-level runtime client. Generated bundles add se
 
 - LangChain, CrewAI, and AutoGen examples
 - async transport
+
+## Error behavior
+
+Convenience tool calls raise `AstrailError` when MCP reports `isError`. Use the raw tool-call method when you need the complete error envelope. HTTP errors and mismatched JSON-RPC response IDs are rejected. Requests do not follow HTTP redirects, so credentials are not forwarded to a redirect target. Tool writes are not automatically retried.
+
+These clients target Astrail's JSON response endpoints. For a sequential SSE-capable stdio bridge, see the repository's CLI guide. Full MCP server-initiated messaging is not implemented by these SDKs.

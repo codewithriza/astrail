@@ -1,3 +1,13 @@
+# 0.5.2 — Repository quality and CLI reliability
+
+- Fix CLI notification IDs, preserved upstream errors, empty HTTP failures, SSE parsing, and session headers.
+- Make TypeScript/Python SDK tool failures explicit, reject mismatched replies, and prevent credential forwarding through redirects.
+- Validate CLI options and call arguments; add unit and process-level regressions.
+- Align package and VERSION files to semantic version 0.5.2.
+- Add repository consistency, secret scanning, Linux/Windows unit, and container startup checks.
+- Run Docker on Node 22 as non-root, exclude development dependencies, and document build-time configuration.
+- Pin CI actions to verified revisions and document CLI transport limitations.
+
 # Open-source edition — 2026-09-12
 
 - Consolidated the application into the root source tree; removed the excluded legacy app copy.

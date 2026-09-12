@@ -9,7 +9,7 @@ Astrail imports API definitions, generates typed agent tools, and maps tool call
 
 ## Try it without credentials
 
-Requires **Node.js 22+** and npm. No database, model API key, or account is needed for this example.
+Requires **Node.js 22.18+** and npm. No database, model API key, or account is needed for this example.
 
 ```bash
 git clone https://github.com/codewithriza/astrail.git
@@ -48,6 +48,8 @@ Open [localhost:3000](http://localhost:3000). The local environment example enab
 
 AI-assisted generation is optional. Deterministic generation works without `ANTHROPIC_API_KEY`. Hosted operation currently depends on Neon Auth/Data API; this is not yet a database-independent, one-command deployment.
 
+For container deployment, follow the [Docker guide](docs/DOCKER.md).
+
 ## Connect to an endpoint
 
 After creating a server in your own deployment:
@@ -59,13 +61,13 @@ node bin/astrail.mjs status
 node bin/astrail.mjs tools list
 ```
 
-Use `node bin/astrail.mjs help` for calls, connector discovery, and the stdio bridge. Public package releases are not yet available; run the CLI from this checkout.
+Use `node bin/astrail.mjs help` for calls, connector discovery, and the stdio bridge. See the [CLI guide](docs/CLI.md) for configuration and protocol limits. Public package releases are not yet available; run the CLI from this checkout.
 
 ## Development
 
 ```bash
-npm run test:core     # offline generation, schema, CLI, and billing checks
-npm run check         # lint, types, core checks, and production build
+npm test             # unit regressions and core smoke checks
+npm run check        # repository checks, lint, types, tests, and build
 ```
 
 CI also runs runtime security, OAuth, integration, export, and UI smoke checks. Changes to those areas require their corresponding tests; see [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -2,9 +2,20 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
+
+
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        # Provider or proxy redirects must not forward the caller's credentials.
+        return None
+
+
+def _open_request(request, timeout):
+    return build_opener(_NoRedirect()).open(request, timeout=timeout)
 
 
 class AstrailError(Exception):
@@ -155,9 +166,9 @@ class AstrailClient:
         return {"mcpServers": {name: server}}
 
     def curl_initialize(self, include_api_key_env: bool = True) -> str:
-        auth = " \\\n  -H 'Authorization: Bearer $ASTRAIL_API_KEY'" if include_api_key_env else ""
+        auth = " \\\n  -H \"Authorization: Bearer $ASTRAIL_API_KEY\"" if include_api_key_env else ""
         return (
-            f"curl -sS -X POST '{self.endpoint}' \\\n"
+            f"curl -sS -X POST {shlex.quote(self.endpoint)} \\\n"
             "  -H 'Content-Type: application/json'"
             f"{auth} \\\n"
             "  --data '{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}'"
@@ -179,12 +190,16 @@ class AstrailClient:
         request = Request(self.endpoint, data=body, headers=headers, method="POST")
         status = 200
         try:
-            with urlopen(request, timeout=self.timeout) as response:
+            with _open_request(request, timeout=self.timeout) as response:
                 status = response.status
                 payload = json.loads(response.read().decode("utf-8"))
         except HTTPError as error:
             status = error.code
-            raw = error.read().decode("utf-8")
+            with error:
+                try:
+                    raw = error.read().decode("utf-8")
+                except OSError:
+                    raw = ""
             try:
                 payload = json.loads(raw)
             except json.JSONDecodeError as exc:
@@ -196,6 +211,8 @@ class AstrailClient:
         except json.JSONDecodeError as error:
             raise AstrailError(f"Astrail returned a non-JSON response with HTTP {status}.", status, status=status) from error
 
+        if not isinstance(payload, dict):
+            raise AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, status=status)
         rpc_error = payload.get("error")
         if rpc_error:
             raise AstrailError(
@@ -204,12 +221,20 @@ class AstrailClient:
                 rpc_error.get("data"),
                 status,
             )
+        if status >= 300:
+            raise AstrailError(f"Astrail request failed with HTTP {status}.", status, status=status)
+        if payload.get("jsonrpc") != "2.0" or payload.get("id") != request_id:
+            raise AstrailError("Astrail returned a mismatched JSON-RPC response.", -32603, status=status)
         if "result" not in payload:
             raise AstrailError("Astrail returned an empty JSON-RPC result.", -32603, status=status)
         return payload["result"]
 
 
 def parse_tool_result(result: dict[str, Any]) -> Any:
+    if result.get("isError"):
+        message = next((item.get("text") for item in result.get("content", [])
+                        if isinstance(item, dict) and item.get("type") == "text"), None)
+        raise AstrailError(message or "Astrail tool execution failed.", -32000, result)
     if "structuredContent" in result:
         return result["structuredContent"]
     content = result.get("content") or []
