@@ -896,7 +896,7 @@ function DashboardContent({
           <Terminal className="h-3.5 w-3.5" />
           Runtime: static, no eval
         </span>
-        <Link href="/docs" className="transition hover:text-neutral-700">Astrail Terms of Use</Link>
+        <Link href="/terms" className="transition hover:text-neutral-700">Astrail Terms of Use</Link>
         <span>{lastCreated ? `Last generation: ${lastCreated}` : `${publicCount} published to catalog`}</span>
       </footer>
     </div>
