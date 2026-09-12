@@ -648,7 +648,8 @@ def fake_urlopen(request, timeout=30):
     return FakeResponse({"jsonrpc": "2.0", "id": body["id"], "result": result})
 
 
-client_module.urlopen = fake_urlopen
+assert hasattr(client_module, "_open_request"), "Packaged SDK transport adapter changed; update this fixture."
+client_module._open_request = fake_urlopen
 
 os.environ["ASTRAIL_API_KEY"] = "sdk_test_key"
 client = AstrailClient(base_url="https://sdk.example", server_id="server_123")
