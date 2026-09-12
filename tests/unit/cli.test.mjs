@@ -81,3 +81,8 @@ test("oversized responses and malformed SSE fail with bounded errors", async () 
   const malformed = makeTransport(async () => new Response('data: broken\n\n', { headers: { "content-type": "text/event-stream" } }));
   await assert.rejects(malformed(request), /malformed SSE/);
 });
+
+test("CLI accepts equals syntax without splitting values", () => {
+  assert.deepEqual(parseArguments(["tools", "--query=a=b"]).options, { query: "a=b" });
+  assert.throws(() => parseArguments(["--query=a", "--query", "b"]), /only once/);
+});

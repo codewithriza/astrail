@@ -10,10 +10,11 @@ export function parseArguments(argv) {
       positional.push(value);
       continue;
     }
-    const key = value.slice(2);
+    const equals = value.indexOf("=");
+    const key = value.slice(2, equals === -1 ? undefined : equals);
     if (!valueOptions.has(key)) throw new Error(`Unknown option: --${key}`);
-    const next = argv[++index];
-    if (next === undefined || next.startsWith("--")) throw new Error(`--${key} requires a value.`);
+    const next = equals === -1 ? argv[++index] : value.slice(equals + 1);
+    if (next === undefined || (equals === -1 && next.startsWith("--"))) throw new Error(`--${key} requires a value.`);
     if (Object.hasOwn(options, key)) throw new Error(`--${key} must be specified only once.`);
     options[key] = next;
   }
