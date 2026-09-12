@@ -86,3 +86,7 @@ test("CLI accepts equals syntax without splitting values", () => {
   assert.deepEqual(parseArguments(["tools", "--query=a=b"]).options, { query: "a=b" });
   assert.throws(() => parseArguments(["--query=a", "--query", "b"]), /only once/);
 });
+
+test("CLI respects the end-of-options marker", () => {
+  assert.deepEqual(parseArguments(["call", "--", "--help", "--tool"]).positional, ["call", "--help", "--tool"]);
+});

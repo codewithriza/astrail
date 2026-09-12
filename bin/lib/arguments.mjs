@@ -5,6 +5,10 @@ export function parseArguments(argv) {
   const positional = [];
   for (let index = 0; index < argv.length; index += 1) {
     const value = argv[index];
+    if (value === "--") {
+      positional.push(...argv.slice(index + 1));
+      break;
+    }
     if (value === "--help" || value === "-h") return { options: {}, positional: ["help"] };
     if (!value.startsWith("--")) {
       positional.push(value);
