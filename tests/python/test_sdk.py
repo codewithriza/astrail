@@ -109,6 +109,12 @@ class SdkTests(unittest.TestCase):
         self.assertEqual(sent["Content-type"], "application/json")
         self.assertEqual(sent["X-trace"], "original")
 
+    def test_invalid_error_envelopes(self):
+        for error in [None, "oops", {}, {"code": True, "message": "bad"}]:
+            with patch("astrail.client._open_request", return_value=Response({"jsonrpc": "2.0", "id": 1, "error": error})):
+                with self.assertRaises(AstrailError):
+                    AstrailClient(endpoint="https://example.test").initialize()
+
 
 if __name__ == "__main__":
     unittest.main()

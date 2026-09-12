@@ -221,7 +221,11 @@ class AstrailClient:
 
         if not isinstance(payload, dict):
             raise AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, status=status)
+        if ("result" in payload) == ("error" in payload):
+            raise AstrailError("Astrail returned an invalid JSON-RPC response.", -32603, status=status)
         rpc_error = payload.get("error")
+        if "error" in payload and (not isinstance(rpc_error, dict) or type(rpc_error.get("code")) is not int or not isinstance(rpc_error.get("message"), str)):
+            raise AstrailError("Astrail returned an invalid JSON-RPC error.", -32603, status=status)
         if rpc_error:
             raise AstrailError(
                 rpc_error.get("message", "Astrail JSON-RPC error."),
