@@ -11,7 +11,7 @@ The public npm package is not published yet. For a server-specific client, use *
 To use the first-party runtime client directly from source:
 
 ```bash
-git clone https://github.com/getastrail/astrail.git vendor/astrail
+git clone https://github.com/codewithriza/astrail.git vendor/astrail
 cd vendor/astrail/sdk/typescript
 npm install
 npm run build
@@ -40,7 +40,7 @@ const toolResult = await astrail.tools.invoke(matches[0].name, { limit: 10 });
 
 const status = await astrail.callEndpoint("get_status", { limit: 10 });
 
-const rawTool = await astrail.callToolRaw("tools/list");
+const rawTool = await astrail.callToolRaw(matches[0].name, { limit: 10 });
 
 const claudeConfig = astrail.mcpConfig({ name: "astrail" });
 const curl = astrail.curlInitialize();

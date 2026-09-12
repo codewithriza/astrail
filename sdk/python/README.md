@@ -9,7 +9,7 @@ The public PyPI package is not published yet. For a server-specific client, use 
 To use the first-party runtime client directly from source:
 
 ```bash
-git clone https://github.com/getastrail/astrail.git vendor/astrail
+git clone https://github.com/codewithriza/astrail.git vendor/astrail
 python -m pip install ./vendor/astrail/sdk/python
 ```
 
@@ -32,7 +32,7 @@ schema = astrail.tools.schema(matches[0]["name"])
 tool_result = astrail.tools.invoke(matches[0]["name"], {"limit": 10})
 
 status = astrail.call_endpoint("get_status", {"limit": 10})
-raw_tool = astrail.call_tool_raw("tools/list")
+raw_tool = astrail.call_tool_raw(matches[0]["name"], {"limit": 10})
 claude_config = astrail.mcp_config("astrail")
 curl = astrail.curl_initialize()
 
