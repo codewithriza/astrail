@@ -93,6 +93,11 @@ class SdkTests(unittest.TestCase):
         client = AstrailClient(base_url="https://example.test/", server_id="team/a?b#c")
         self.assertEqual(client.endpoint, "https://example.test/api/mcp/team%2Fa%3Fb%23c")
 
+    def test_invalid_timeouts_fail_before_io(self):
+        for timeout in [0, -1, float("nan"), float("inf"), True, "30"]:
+            with self.subTest(timeout=timeout), self.assertRaises(ValueError):
+                AstrailClient(endpoint="https://example.test", timeout=timeout)
+
 
 if __name__ == "__main__":
     unittest.main()

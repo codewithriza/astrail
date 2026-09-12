@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import shlex
 from urllib.parse import urlsplit, quote
@@ -79,6 +80,8 @@ class AstrailClient:
         _ = parsed.port  # Validate malformed and out-of-range port numbers.
         self.endpoint = endpoint
         self.api_key = api_key if api_key is not None else os.environ.get("ASTRAIL_API_KEY")
+        if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
+            raise ValueError("timeout must be a finite positive number of seconds.")
         self.timeout = timeout
         self.headers = headers or {}
         self._next_id = 1
