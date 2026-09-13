@@ -14,6 +14,8 @@ import type { GeneratedMcpServer, McpClientPreset, McpGenerationMode, McpTool, O
 export { looksLikeOpenApiSpec, parseSpecText, validateOpenApiSpec };
 
 const MAX_OPENAPI_SPEC_BYTES = 5_000_000;
+const MAX_OPENAPI_SPEC_REDIRECTS = 5;
+const OPENAPI_REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
 const ANTHROPIC_GENERATION_MODEL = process.env.ANTHROPIC_GENERATION_MODEL ?? "claude-sonnet-5";
 
 export async function loadSpec(input: {
@@ -25,35 +27,33 @@ export async function loadSpec(input: {
 
   if (input.sourceType === "openapi_url") {
     if (!input.sourceUrl) throw new Error("OpenAPI URL is required.");
-    const sourceUrl = new URL(input.sourceUrl);
-    await assertSafeUpstreamUrl(sourceUrl);
-    const response = await fetch(sourceUrl, {
-      headers: { accept: "application/json, text/plain, */*" },
-      redirect: "manual",
-      signal: AbortSignal.timeout(15000),
-    });
-    if ([301, 302, 303, 307, 308].includes(response.status)) {
-      const location = response.headers.get("location");
-      if (!location) throw new Error("OpenAPI URL redirected without a Location header.");
-      const redirectUrl = new URL(location, sourceUrl);
-      await assertSafeUpstreamUrl(redirectUrl);
-      const redirected = await fetch(redirectUrl, {
+    let sourceUrl = new URL(input.sourceUrl);
+    for (let redirects = 0; redirects <= MAX_OPENAPI_SPEC_REDIRECTS; redirects += 1) {
+      await assertSafeUpstreamUrl(sourceUrl);
+      const response = await fetch(sourceUrl, {
         headers: { accept: "application/json, text/plain, */*" },
         redirect: "manual",
         signal: AbortSignal.timeout(15000),
       });
-      if (!redirected.ok) {
-        throw new Error(`Could not fetch spec. HTTP ${redirected.status}.`);
+
+      if (OPENAPI_REDIRECT_STATUSES.has(response.status)) {
+        const location = response.headers.get("location");
+        if (response.body) await response.body.cancel().catch(() => {});
+        if (!location) throw new Error("OpenAPI URL redirected without a Location header.");
+        sourceUrl = new URL(location, sourceUrl);
+        continue;
       }
-      parsed = parseSpecText(await readBoundedResponseText(redirected, MAX_OPENAPI_SPEC_BYTES, "OpenAPI document"));
+
+      if (!response.ok) {
+        if (response.body) await response.body.cancel().catch(() => {});
+        throw new Error(`Could not fetch spec. HTTP ${response.status}.`);
+      }
+
+      parsed = parseSpecText(await readBoundedResponseText(response, MAX_OPENAPI_SPEC_BYTES, "OpenAPI document"));
       return validateOpenApiSpec(parsed);
     }
 
-    if (!response.ok) {
-      throw new Error(`Could not fetch spec. HTTP ${response.status}.`);
-    }
-
-    parsed = parseSpecText(await readBoundedResponseText(response, MAX_OPENAPI_SPEC_BYTES, "OpenAPI document"));
+    throw new Error("OpenAPI URL stopped after too many redirects.");
   } else {
     if (!input.rawJson) throw new Error("Raw OpenAPI JSON is required.");
     parsed = parseSpecText(input.rawJson, "json");
