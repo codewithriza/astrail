@@ -534,6 +534,21 @@ function zodFieldsFromSchema(schema: Record<string, unknown>) {
     .join("\n");
 }
 
+function pathArgumentNameMappings(schema: Record<string, unknown>): Array<[string, string]> {
+  const properties = schema.properties && typeof schema.properties === "object"
+    ? schema.properties as Record<string, unknown>
+    : {};
+
+  return Object.entries(properties).flatMap(([argumentName, value]) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+    const property = value as Record<string, unknown>;
+    const originalName = property["x-astrail-name"];
+    return property["x-astrail-in"] === "path" && typeof originalName === "string"
+      ? [[originalName, argumentName] as [string, string]]
+      : [];
+  });
+}
+
 function zodExpressionForJsonSchema(schema: unknown): string {
   if (!schema || typeof schema !== "object") return "z.unknown()";
   const record = schema as Record<string, unknown>;
@@ -566,7 +581,9 @@ function generateFallbackCode(input: {
   baseUrl: string;
 }) {
   const toolBlocks = input.tools.map((tool) => {
-    const fields = zodFieldsFromSchema(tool.input_schema ?? {});
+    const inputSchema = tool.input_schema ?? {};
+    const fields = zodFieldsFromSchema(inputSchema);
+    const pathArgumentMappings = pathArgumentNameMappings(inputSchema);
     return `server.tool(
   ${JSON.stringify(tool.name)},
   ${JSON.stringify(tool.description)},
@@ -575,7 +592,8 @@ ${fields}
   }),
   async (args) => {
     try {
-      const path = ${JSON.stringify(tool.path ?? "/")}.replace(/\\{([^}]+)\\}/g, (_match, key) => encodeURIComponent(String(args[key] ?? "")));
+      const pathArgumentNames = new Map<string, string>(${JSON.stringify(pathArgumentMappings)});
+      const path = ${JSON.stringify(tool.path ?? "/")}.replace(/\\{([^}]+)\\}/g, (_match, key) => encodeURIComponent(String(args[pathArgumentNames.get(key) ?? key] ?? "")));
       const response = await fetch(baseUrl + path, {
         method: ${JSON.stringify(tool.method ?? "GET")},
         headers: {

@@ -23,7 +23,7 @@ function assert(condition: unknown, message: string, detail?: unknown) {
 }
 
 async function main() {
-  const [{ normalizeOpenApiSpec }, { buildEndpointInputSchema }, { validateToolInput }] = await Promise.all([
+  const [{ normalizeOpenApiSpec }, { buildEndpointInputSchema, generateMcpLocally }, { validateToolInput }] = await Promise.all([
     import("../lib/openapi"),
     import("../lib/generate-mcp"),
     import("../lib/runtime/tool-input-validation"),
@@ -78,7 +78,43 @@ async function main() {
   const valid = validateToolInput(inputSchema, { subject: "Billing issue", priority: "high" });
   assert(valid.ok, "Expected valid vendor +json body args to pass runtime validation.", valid);
 
-  console.log("PASS: OpenAPI vendor +json body schemas feed generated MCP args and runtime validation.");
+  const { spec: pathSpec } = normalizeOpenApiSpec({
+    openapi: "3.0.3",
+    info: { title: "Renamed Path Arguments", version: "1.0.0" },
+    servers: [{ url: "https://api.example.com" }],
+    paths: {
+      "/customers/{customer-id}": {
+        get: {
+          operationId: "getCustomer",
+          parameters: [
+            {
+              name: "customer-id",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+            },
+          ],
+          responses: { "200": { description: "Customer" } },
+        },
+      },
+    },
+  });
+  const generated = generateMcpLocally(pathSpec);
+  const generatedTool = generated.tools[0];
+  const generatedProperties = generatedTool?.input_schema?.properties as Record<string, unknown> | undefined;
+  assert(generatedProperties?.customer_id, "Expected the path parameter to use its generated argument name.", generatedTool?.input_schema);
+  assert(
+    generated.generated_code.includes('new Map<string, string>([["customer-id","customer_id"]])'),
+    "Expected generated code to map the original path parameter to the sanitized argument name.",
+    generated.generated_code,
+  );
+  assert(
+    generated.generated_code.includes("args[pathArgumentNames.get(key) ?? key]"),
+    "Expected generated path interpolation to use the argument-name mapping.",
+    generated.generated_code,
+  );
+
+  console.log("PASS: OpenAPI JSON schemas and renamed path parameters feed valid generated MCP arguments.");
 }
 
 main().catch((error) => {
