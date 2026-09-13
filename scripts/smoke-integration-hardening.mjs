@@ -93,6 +93,71 @@ else process.env.NEXT_PUBLIC_APP_URL = previousAppUrl;
 if (previousCorsOrigins === undefined) delete process.env.ASTRAIL_CORS_ORIGINS;
 else process.env.ASTRAIL_CORS_ORIGINS = previousCorsOrigins;
 
+// --- OpenAPI schema refresh redirects ----------------------------------------
+
+const redirectCalls = [];
+const checkedRedirectUrls = [];
+let redirectMode = "success";
+const redirectFetch = async (input, init = {}) => {
+  const url = String(input);
+  redirectCalls.push({ url, redirect: init.redirect });
+  if (redirectMode === "success") {
+    if (url.endsWith("/start")) return new Response(null, { status: 302, headers: { location: "/middle" } });
+    if (url.endsWith("/middle")) return new Response(null, { status: 307, headers: { location: "https://spec.example/final" } });
+    return Response.json({ openapi: "3.0.3", info: { title: "Redirected API", version: "1.0.0" }, paths: {} });
+  }
+  if (redirectMode === "blocked") {
+    return new Response(null, { status: 302, headers: { location: "https://blocked.example/spec.json" } });
+  }
+  return new Response(null, { status: 302, headers: { location: "/loop" } });
+};
+const schemaLoader = loadTsModule("lib/generate-mcp.ts", {
+  "./anthropic": {},
+  "./openapiContent": {},
+  "./openapi": { parseSpecText: (text) => JSON.parse(text) },
+  "./runtime/network-policy": {
+    async assertSafeUpstreamUrl(url) {
+      checkedRedirectUrls.push(url.toString());
+      if (url.hostname === "blocked.example") throw new Error("Blocked redirect target.");
+    },
+    readBoundedResponseText: async (response) => response.text(),
+  },
+  "./validators": {
+    looksLikeOpenApiSpec: () => true,
+    validateGeneratedMcp: (value) => value,
+    validateOpenApiSpec: (value) => value,
+  },
+}, { fetch: redirectFetch });
+
+const redirectedSpec = await schemaLoader.loadSpec({ sourceType: "openapi_url", sourceUrl: "https://spec.example/start" });
+assert.equal(redirectedSpec.info.title, "Redirected API");
+assert.deepEqual(redirectCalls.map((call) => call.url), [
+  "https://spec.example/start",
+  "https://spec.example/middle",
+  "https://spec.example/final",
+]);
+assert(redirectCalls.every((call) => call.redirect === "manual"));
+assert.deepEqual(checkedRedirectUrls, redirectCalls.map((call) => call.url));
+
+redirectMode = "blocked";
+redirectCalls.length = 0;
+checkedRedirectUrls.length = 0;
+await assert.rejects(
+  () => schemaLoader.loadSpec({ sourceType: "openapi_url", sourceUrl: "https://spec.example/start" }),
+  /Blocked redirect target/,
+);
+assert.deepEqual(redirectCalls.map((call) => call.url), ["https://spec.example/start"]);
+assert.deepEqual(checkedRedirectUrls, ["https://spec.example/start", "https://blocked.example/spec.json"]);
+
+redirectMode = "loop";
+redirectCalls.length = 0;
+checkedRedirectUrls.length = 0;
+await assert.rejects(
+  () => schemaLoader.loadSpec({ sourceType: "openapi_url", sourceUrl: "https://spec.example/loop" }),
+  /too many redirects/,
+);
+assert.equal(redirectCalls.length, 6);
+
 // --- Field mapping -----------------------------------------------------------
 
 const fieldMapping = loadTsModule("lib/runtime/field-mapping.ts");
