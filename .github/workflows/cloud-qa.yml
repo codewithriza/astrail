@@ -136,3 +136,7 @@ jobs:
           done
           curl --fail --silent http://127.0.0.1:3000/ > /dev/null
           npm run smoke:landing-clients
+
+      - name: Browser regression suite
+        timeout-minutes: 12
+        run: npm run test:ui:chromium

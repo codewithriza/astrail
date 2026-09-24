@@ -407,7 +407,7 @@ export function DashboardTopbar() {
                   type="button"
                   aria-haspopup="menu"
                   aria-expanded={openMenu === tab.label}
-                  onClick={() => setOpenMenu(openMenu === tab.label ? null : tab.label)}
+                  onClick={() => openNavMenu(tab.label)}
                   className={baseClass}
                 >
                   {tab.label}

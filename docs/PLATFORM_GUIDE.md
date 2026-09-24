@@ -619,7 +619,6 @@ Generated SDK bundles include owned client code and package scaffolds for:
 - Endpoint catalog install/fork polish and provider credential setup
 - MCP composition bundle UI/runtime polish with one aggregate endpoint
 - Organization-wide SSO and workspace RBAC beyond per-user server ownership
-- Credit-based billing with Dodo Payments checkout and webhooks
 - Custom tool definitions and manual edits
 - Version history and regeneration diffs
 - A/B testing tool descriptions
@@ -672,8 +671,8 @@ NEXT_PUBLIC_ASTRAIL_GITHUB_OAUTH_ENABLED=false
 NEXT_PUBLIC_ASTRAIL_ALLOW_DEMO_AUTH=true
 DODO_PAYMENTS_API_KEY=
 DODO_PAYMENTS_ENVIRONMENT=test_mode
-DODO_PRODUCT_BUILDER=
-DODO_PRODUCT_TEAM=
+DODO_PRODUCT_LAUNCH=
+DODO_PRODUCT_SCALE=
 DODO_PAYMENTS_WEBHOOK_KEY=
 ```
 

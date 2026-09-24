@@ -133,7 +133,7 @@ $$;
 revoke all on function public.record_x402_challenge(uuid, uuid, text, text, text, jsonb, timestamptz) from public;
 revoke all on function public.record_x402_challenge(uuid, uuid, text, text, text, jsonb, timestamptz) from anon;
 revoke all on function public.record_x402_challenge(uuid, uuid, text, text, text, jsonb, timestamptz) from authenticated;
-grant execute on function public.record_x402_challenge(uuid, uuid, text, text, text, jsonb, timestamptz) to service_role;
+grant execute on function public.record_x402_challenge(uuid, uuid, text, text, text, jsonb, timestamptz) to admin;
 
 create table if not exists public.x402_payment_receipts (
   id uuid primary key default gen_random_uuid(),
@@ -283,4 +283,4 @@ $$;
 revoke all on function public.claim_x402_payment(uuid, uuid, text, text, text, text, text, text, text, text, text, text) from public;
 revoke all on function public.claim_x402_payment(uuid, uuid, text, text, text, text, text, text, text, text, text, text) from anon;
 revoke all on function public.claim_x402_payment(uuid, uuid, text, text, text, text, text, text, text, text, text, text) from authenticated;
-grant execute on function public.claim_x402_payment(uuid, uuid, text, text, text, text, text, text, text, text, text, text) to service_role;
+grant execute on function public.claim_x402_payment(uuid, uuid, text, text, text, text, text, text, text, text, text, text) to admin;

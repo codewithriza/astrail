@@ -20,6 +20,7 @@ export default defineConfig([
     "astrail-funding/**",
     ".tmp/**",
     "memory/**",
+    "reports/playwright/**",
     "next-env.d.ts",
   ]),
 ]);

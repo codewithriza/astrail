@@ -16,7 +16,7 @@ NEON_AUTH_SERVICE_EMAIL=<dedicated-runtime-user>
 NEON_AUTH_SERVICE_PASSWORD=<random-runtime-password>
 ```
 
-Keep every variable except the two `NEXT_PUBLIC_` URLs server-only. The runtime identity must have the Neon Auth `admin` role. PostgreSQL role `admin` is the only Data API role with `BYPASSRLS`; browser users run as `authenticated` and remain restricted by RLS.
+Keep every variable except the two `NEXT_PUBLIC_` URLs server-only. Create the runtime identity with `npm run configure:neon:service-user`, assign it the Neon Auth `admin` role in the Neon console, and rerun the command to verify the token role. PostgreSQL role `admin` is the only Data API role with `BYPASSRLS`; browser users run as `authenticated` and remain restricted by RLS.
 
 ## Existing users
 

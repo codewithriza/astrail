@@ -5,7 +5,7 @@ Astrail's first production-depth connector set is GitHub, Linear, Notion, Slack,
 ## Install from the CLI
 
 ```bash
-astrail login --endpoint https://app.astrail.io/api/mcp/YOUR_SERVER_ID --api-key "$ASTRAIL_API_KEY"
+astrail login --endpoint https://www.astrail.dev/api/mcp/YOUR_SERVER_ID --api-key "$ASTRAIL_API_KEY"
 astrail connectors list
 astrail connectors install preset-github
 ```

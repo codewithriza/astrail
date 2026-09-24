@@ -168,7 +168,7 @@ export function validateRuntimeEnv() {
       configured: Boolean(process.env.NEON_AUTH_SERVICE_EMAIL && process.env.NEON_AUTH_SERVICE_PASSWORD),
       required: true,
       status: process.env.NEON_AUTH_SERVICE_EMAIL && process.env.NEON_AUTH_SERVICE_PASSWORD ? "ready" : "missing",
-      note: "Required for private endpoint auth, logs, bundles, and runtime admin reads.",
+      note: "Credentials must belong to a verified Neon Auth admin; run configure:neon:service-user and smoke:neon-auth before launch.",
     },
     {
       name: "ANTHROPIC_API_KEY",

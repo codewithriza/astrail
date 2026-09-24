@@ -270,7 +270,7 @@ async function main() {
   assert.match(migration, /v_active >= 32/);
   assert.match(migration, /status in \('reserved', 'settled', 'in_doubt'\)/);
   assert.match(migration, /and asset = p_asset/);
-  assert.match(migration, /grant execute on function public\.claim_x402_payment[\s\S]*service_role/);
+  assert.match(migration, /grant execute on function public\.claim_x402_payment[\s\S]*admin/);
   const runtimeRoute = await readFile("app/api/mcp/[serverId]/route.ts", "utf8");
   assert.match(runtimeRoute, /PAYMENT-SIGNATURE/);
   assert.match(runtimeRoute, /x402PaymentSignature/);

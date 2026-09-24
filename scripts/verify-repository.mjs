@@ -36,4 +36,9 @@ for (const file of documents) {
     assert.ok(existsSync(resolve(dirname(file), target)), `Broken local documentation link: ${file} → ${raw}`);
   }
 }
-console.log(`PASS: version/lockfile consistency, environment-file hygiene, script paths, and local links in ${documents.length} documents.`);
+const migrations = files.filter(file => file.startsWith("database/migrations/") && file.endsWith(".sql"));
+for (const file of migrations) {
+  assert.doesNotMatch(read(file), /\bto\s+service_role\b/i, `Migration still grants privileges to removed service_role: ${file}`);
+}
+assert.doesNotMatch(read("docs/production-endpoints.md"), /SUPABASE_/i, "Production endpoint setup must use the current Neon backend.");
+console.log(`PASS: version/lockfile consistency, environment-file hygiene, script paths, migrations, and local links in ${documents.length} documents.`);

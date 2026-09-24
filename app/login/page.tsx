@@ -103,7 +103,7 @@ function LoginForm() {
             required
           />
         </div>
-        <PasswordField id="password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" />
+        {hasNeonAuth ? <PasswordField id="password" label="Password" value={password} onChange={setPassword} autoComplete="current-password" /> : null}
         {!hasNeonAuth && !demoAuthAllowed ? (
           <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-800">
             Production sign-in is required here. Finish workspace auth setup to enable this screen.

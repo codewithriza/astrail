@@ -8,7 +8,7 @@ Set the Neon values listed in `.env.example`. Keep database URLs, the cookie sec
 
 In Neon, allow the deployed Astrail origins and localhost during development. Enable Google or GitHub in Neon Auth before setting the corresponding `NEXT_PUBLIC_ASTRAIL_*_OAUTH_ENABLED` flag. Provider callback URLs are handled by Neon Auth; Astrail's application callback is `/auth/complete`.
 
-The runtime service user must have the Neon Auth `admin` role. The matching PostgreSQL `admin` role has `BYPASSRLS`; ordinary sessions use `authenticated` and remain governed by row-level security.
+Create the runtime service user with `npm run configure:neon:service-user`, then assign that user the Neon Auth `admin` role in the Neon console and rerun the command. The command fails until its access token contains the `admin` role. The matching PostgreSQL `admin` role has `BYPASSRLS`; ordinary sessions use `authenticated` and remain governed by row-level security.
 
 ## Legacy accounts
 

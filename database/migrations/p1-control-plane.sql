@@ -56,12 +56,12 @@ returns void language plpgsql security definer set search_path=public as $$ begi
 end $$;
 revoke all on function public.acquire_provider_permit(uuid,text,uuid,timestamptz) from public,anon,authenticated;
 revoke all on function public.record_reliability_metric(uuid,text,uuid,text,int) from public,anon,authenticated;
-grant execute on function public.acquire_provider_permit(uuid,text,uuid,timestamptz) to service_role;
-grant execute on function public.record_reliability_metric(uuid,text,uuid,text,int) to service_role;
+grant execute on function public.acquire_provider_permit(uuid,text,uuid,timestamptz) to admin;
+grant execute on function public.record_reliability_metric(uuid,text,uuid,text,int) to admin;
 revoke all on function public.consume_provider_retry_budget(uuid,text,uuid) from public,anon,authenticated;
 revoke all on function public.record_provider_outcome(uuid,text,uuid,boolean) from public,anon,authenticated;
-grant execute on function public.consume_provider_retry_budget(uuid,text,uuid) to service_role;
-grant execute on function public.record_provider_outcome(uuid,text,uuid,boolean) to service_role;
+grant execute on function public.consume_provider_retry_budget(uuid,text,uuid) to admin;
+grant execute on function public.record_provider_outcome(uuid,text,uuid,boolean) to admin;
 
 alter table if exists public.api_credentials add column if not exists expected_scopes jsonb not null default '[]'::jsonb;
 alter table if exists public.api_credentials add column if not exists consecutive_refresh_failures int not null default 0;

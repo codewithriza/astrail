@@ -107,7 +107,7 @@ begin
   return query select deleted_rows, held_rows;
 end $$;
 revoke all on function public.purge_audit_logs(uuid,timestamptz,int) from public, anon, authenticated;
-grant execute on function public.purge_audit_logs(uuid,timestamptz,int) to service_role;
+grant execute on function public.purge_audit_logs(uuid,timestamptz,int) to admin;
 
 -- No application role may directly update or delete audit evidence.
 revoke update, delete, truncate on public.tool_call_logs from anon, authenticated;

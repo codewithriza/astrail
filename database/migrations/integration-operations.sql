@@ -64,7 +64,7 @@ begin
 end;
 $$;
 revoke all on function public.claim_tool_execution(uuid, uuid, text, text, text) from public, anon, authenticated;
-grant execute on function public.claim_tool_execution(uuid, uuid, text, text, text) to service_role;
+grant execute on function public.claim_tool_execution(uuid, uuid, text, text, text) to admin;
 
 drop policy if exists "tool execution dedup is owned by users" on public.tool_execution_dedup;
 create policy "tool execution dedup is owned by users" on public.tool_execution_dedup for all

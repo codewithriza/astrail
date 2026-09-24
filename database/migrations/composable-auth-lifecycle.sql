@@ -113,5 +113,5 @@ end $$;
 
 revoke all on function public.claim_oauth_refresh(uuid,uuid,bigint,text,timestamptz) from public, anon, authenticated;
 revoke all on function public.commit_oauth_refresh(uuid,uuid,text,bigint,text,text,timestamptz,timestamptz,int,jsonb) from public, anon, authenticated;
-grant execute on function public.claim_oauth_refresh(uuid,uuid,bigint,text,timestamptz) to service_role;
-grant execute on function public.commit_oauth_refresh(uuid,uuid,text,bigint,text,text,timestamptz,timestamptz,int,jsonb) to service_role;
+grant execute on function public.claim_oauth_refresh(uuid,uuid,bigint,text,timestamptz) to admin;
+grant execute on function public.commit_oauth_refresh(uuid,uuid,text,bigint,text,text,timestamptz,timestamptz,int,jsonb) to admin;
