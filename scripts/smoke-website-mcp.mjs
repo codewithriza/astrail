@@ -66,6 +66,9 @@ async function smokeWebsite(websiteUrl) {
   console.log(`tools/list: ${tools.length}`);
 
   const tool = tools.find((item) => item.name.includes("open_page")) ?? tools[0];
+  if (tool?._meta?.astrail?.policy !== "allow") {
+    fail("safe browser read is not marked allow", JSON.stringify(tool, null, 2));
+  }
   const called = await rpc(endpoint, {
     jsonrpc: "2.0",
     id: 3,

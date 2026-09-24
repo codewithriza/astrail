@@ -79,13 +79,10 @@ export async function POST(request: Request) {
   }
 
   if (!hasServerNeonEnv()) {
-    return NextResponse.json({
-      request: {
-        id: `local_${Date.now()}`,
-        created_at: new Date().toISOString(),
-        preview: true,
-      },
-    });
+    return NextResponse.json(
+      { error: "Request intake is unavailable until persistent storage is configured. Please contact hi@astrail.dev." },
+      { status: 503 },
+    );
   }
 
   try {

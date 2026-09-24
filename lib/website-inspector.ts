@@ -71,39 +71,50 @@ function buildTools(controls: PageControl[], title: string): { tools: McpTool[];
   const selected = Array.from(deduped.values()).slice(0, MAX_TOOLS);
   const tools = selected.map((control) => {
     const name = `browser_${control.kind}_${slug(control.label)}`;
+    const readOnly = control.kind === "open_page" || control.kind === "follow_link"
+      || (control.kind === "submit_form" && (control.method ?? "GET").toUpperCase() === "GET");
     return {
       name,
       description: `Browser workflow for ${title}: ${control.label}. Safe public reads execute in Playwright; interactive/auth flows require runtime review.`,
       input_schema: inputSchemaFor(control),
       method: "BROWSER",
       path: control.selector ?? control.href ?? "/",
+      annotations: { readOnlyHint: readOnly },
+      policy: readOnly ? "allow" as const : "approval" as const,
     };
   });
 
-  const endpointMap = selected.map((control, index) => ({
-    method: "BROWSER",
-    path: control.selector ?? control.href ?? "/",
-    runtime_kind: "browser" as const,
-    browser_action: control.kind,
-    selector: control.selector,
-    target_url: control.href ?? control.action ?? null,
-    tool_name: tools[index].name,
-    operation_id: tools[index].name,
-    summary: control.label,
-    description: tools[index].description,
-    parameters: control.inputs?.map((input) => ({
-      name: input.name,
-      in: "browser_form",
-      required: input.required,
-      schema: { type: input.type === "number" ? "number" : "string" },
-    })) ?? [],
-    request_body: control.kind === "submit_form" ? { method: control.method ?? "GET" } : undefined,
-    responses: {
-      website_browser_runtime: { description: "Playwright-backed public page read for open/link/GET form workflows." },
-      browser_runtime_required: { description: "Requires reviewed isolated Playwright execution for interactive workflows." },
-    },
-    requires_auth: false,
-  }));
+  const endpointMap = selected.map((control, index) => {
+    const readOnly = control.kind === "open_page" || control.kind === "follow_link"
+      || (control.kind === "submit_form" && (control.method ?? "GET").toUpperCase() === "GET");
+    return {
+      method: "BROWSER",
+      path: control.selector ?? control.href ?? "/",
+      runtime_kind: "browser" as const,
+      browser_action: control.kind,
+      selector: control.selector,
+      target_url: control.href ?? control.action ?? null,
+      tool_name: tools[index].name,
+      operation_id: tools[index].name,
+      summary: control.label,
+      description: tools[index].description,
+      parameters: control.inputs?.map((input) => ({
+        name: input.name,
+        in: "browser_form",
+        required: input.required,
+        schema: { type: input.type === "number" ? "number" : "string" },
+      })) ?? [],
+      request_body: control.kind === "submit_form" ? { method: control.method ?? "GET" } : undefined,
+      responses: {
+        website_browser_runtime: { description: "Playwright-backed public page read for open/link/GET form workflows." },
+        browser_runtime_required: { description: "Requires reviewed isolated Playwright execution for interactive workflows." },
+      },
+      requires_auth: false,
+      operation_kind: readOnly ? "read" as const : "write" as const,
+      action_class: readOnly ? "read" as const : "write" as const,
+      policy: readOnly ? "allow" as const : "approval" as const,
+    };
+  });
 
   return { tools, endpointMap };
 }

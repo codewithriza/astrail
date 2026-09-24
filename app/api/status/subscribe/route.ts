@@ -12,7 +12,10 @@ export async function POST(request: Request) {
   }
 
   if (!isNeonConfigured()) {
-    return NextResponse.json({ ok: true, preview: true });
+    return NextResponse.json(
+      { error: "Status subscriptions are unavailable until persistent storage is configured." },
+      { status: 503 },
+    );
   }
 
   const neon = createNeonAdmin();
