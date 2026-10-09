@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.ts";
 
 :root {
   color-scheme: light;
@@ -113,7 +112,11 @@ select {
   }
 
   .section-card {
-    @apply console-card p-5 sm:p-6;
+    @apply min-w-0 rounded-2xl border border-neutral-200/70 bg-white shadow-[0_1px_2px_rgba(70,45,0,0.03)] transition-shadow duration-300 p-5 sm:p-6;
+  }
+
+  .section-card:hover {
+    @apply shadow-[0_12px_36px_rgba(70,45,0,0.07)];
   }
 
   .section-card-header {
