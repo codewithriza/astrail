@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import AstrailLandingPage from "@/components/marketing/AstrailLandingPage";
 
 export const metadata: Metadata = {
@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "Turn API definitions into MCP tools. Open-source generation, execution policies, CLI, and SDKs. Get the code or read the documentation.",
   openGraph: { title: "Astrail | Open-source tools for AI agents", description: "Your APIs. Ready for agents. MIT licensed and open source." },
 };
+
+export const viewport: Viewport = { themeColor: "#ff7a29" };
 
 export default function Home() {
   return <AstrailLandingPage />;

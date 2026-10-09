@@ -1,0 +1,15 @@
+/* Page-level tweaks for the pixel landing page only. */
+html:has([data-pixel-site]) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+  scrollbar-color: #ff7a29 #f4efe4;
+}
+html:has([data-pixel-site]) body {
+  background: #f4efe4;
+  overflow-x: clip;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has([data-pixel-site]) {
+    scroll-behavior: auto;
+  }
+}
