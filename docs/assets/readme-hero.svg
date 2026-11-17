@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" fill="none">
+<title>Astrail — Turn APIs into agent tools</title>
+<desc>Astrail’s triangular mark on a dark background, with API inputs routed through a policy gate to MCP tools.</desc>
+<defs><linearGradient id="bg" x2="1200" y2="420" gradientUnits="userSpaceOnUse"><stop stop-color="#111c27"/><stop offset="1" stop-color="#060b10"/></linearGradient><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" stroke="#9bddcf" stroke-opacity=".055"/></pattern></defs>
+<rect width="1200" height="420" rx="20" fill="url(#bg)"/><rect width="1200" height="420" rx="20" fill="url(#grid)"/>
+<g transform="translate(65 55) scale(.14)"><path fill="#a3f3ce" fill-rule="evenodd" d="M256 48L456 416H56L256 48ZM241 229L259 306L225 373H164L241 229ZM259 168L349 373H287L259 306V168Z"/></g>
+<g font-family="Arial, Helvetica, sans-serif"><text x="148" y="108" fill="#f3f7f6" font-size="44" font-weight="700" letter-spacing="-2">astrail</text>
+<text x="72" y="195" fill="#f3f7f6" font-size="48" font-weight="700" letter-spacing="-1.5">Your APIs.</text><text x="72" y="252" fill="#a3f3ce" font-size="48" font-weight="700" letter-spacing="-1.5">Ready for agents.</text>
+<text x="74" y="308" fill="#9cabb8" font-size="19">Generate tools. Define policies. Trace calls.</text>
+<text x="74" y="374" fill="#789185" font-size="12" letter-spacing="3">OPEN SOURCE  /  MIT LICENSE</text>
+<g stroke="#3b7665" stroke-width="2"><path d="M760 136H808V210H856M760 210H856M760 284H808V210M984 210H1020"/></g>
+<g fill="#101f25" stroke="#30474d"><rect x="640" y="109" width="120" height="54" rx="10"/><rect x="640" y="183" width="120" height="54" rx="10"/><rect x="640" y="257" width="120" height="54" rx="10"/><rect x="856" y="173" width="128" height="74" rx="12"/><rect x="1020" y="173" width="116" height="74" rx="12"/></g>
+<g fill="#c7d6dd" font-size="16" text-anchor="middle"><text x="700" y="142">OpenAPI</text><text x="700" y="216">GraphQL</text><text x="700" y="290">HTTP MCP</text><text x="920" y="216" fill="#a3f3ce">Policy gate</text><text x="1078" y="206">MCP</text><text x="1078" y="226">tools</text></g>
+<text x="875" y="343" fill="#92a7ae" font-size="13" text-anchor="middle">ALLOW / APPROVAL / BLOCK</text></g></svg>

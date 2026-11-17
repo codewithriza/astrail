@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="500" viewBox="0 0 1280 500">
+<title>Astrail: from an OpenAPI spec to tools with explicit policies</title>
+<desc>Left: npm run demo:offline outputs notes_list_notes allow, notes_create_note approval, and notes_delete_note block. Right: the Notes API definition branches to those three generated tools. Three tools validated; no upstream calls executed.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1916"/><stop offset="1" stop-color="#101c21"/></linearGradient></defs>
+<rect x="1" y="1" width="1278" height="498" rx="20" fill="url(#bg)" stroke="#30473e" stroke-width="2"/>
+<path d="M500 26V474" stroke="#263b34"/>
+<circle cx="36" cy="38" r="6" fill="#ff625a"/><circle cx="58" cy="38" r="6" fill="#f4bc4f"/><circle cx="80" cy="38" r="6" fill="#3bc780"/>
+<g font-family="monospace" font-size="17">
+<text x="456" y="44" text-anchor="end" fill="#789e90" font-size="14">astrail</text>
+<text x="30" y="103" fill="#dbe9e3" xml:space="preserve"><tspan fill="#83d9b8">$ </tspan>npm run demo:offline</text>
+<text x="30" y="151" fill="#7d9b8f" font-size="15">OpenAPI → validated MCP tools</text>
+<text x="30" y="204" fill="#dbe9e3">notes_list_notes</text><text x="363" y="204" fill="#83d9b8">allow</text>
+<text x="30" y="245" fill="#dbe9e3">notes_create_note</text><text x="363" y="245" fill="#ebc484">approval</text>
+<text x="30" y="286" fill="#dbe9e3">notes_delete_note</text><text x="363" y="286" fill="#ed9f9a">block</text>
+<text x="30" y="407" fill="#83d9b8" font-weight="700">3 tools. Explicit policies.</text>
+<text x="30" y="440" fill="#8eaa9e" font-size="14">No upstream calls executed.</text>
+</g>
+<g font-family="Arial, Helvetica, sans-serif">
+<text x="543" y="48" fill="#87a698" font-size="12" letter-spacing="2">API DEFINITION → GENERATED TOOLS</text>
+<g fill="none" stroke-width="2"><path d="M705 250H754V134H804" stroke="#64bf9e"/><path d="M705 250H804" stroke="#bd9c64"/><path d="M754 250V366H804" stroke="#b37575" stroke-dasharray="5 5"/></g>
+<rect x="539" y="204" width="166" height="92" rx="12" fill="#152b23" stroke="#436b57"/>
+<text x="622" y="242" fill="#def0e7" text-anchor="middle" font-size="21" font-weight="700">Notes API</text><text x="622" y="269" fill="#8fae9e" text-anchor="middle" font-size="14">OpenAPI 3.0.3</text>
+<g fill="#12261f" stroke="#345b49"><rect x="804" y="90" width="432" height="88" rx="12"/><rect x="804" y="206" width="432" height="88" rx="12"/><rect x="804" y="322" width="432" height="88" rx="12"/></g>
+<g font-family="monospace" font-size="17" fill="#e0ebe5"><text x="827" y="123">notes_list_notes</text><text x="827" y="239">notes_create_note</text><text x="827" y="355">notes_delete_note</text></g>
+<g font-family="monospace" font-size="14" fill="#8fae9e"><text x="827" y="152">GET /notes</text><text x="827" y="268">POST /notes</text><text x="827" y="384">DELETE /notes/{id}</text></g>
+<g text-anchor="end" font-size="12" font-weight="700"><text x="1216" y="152" fill="#83d9b8">ALLOW</text><text x="1216" y="268" fill="#ebc484">APPROVAL</text><text x="1216" y="384" fill="#ed9f9a">BLOCK</text></g>
+<text x="888" y="458" fill="#8fae9e" text-anchor="middle" font-size="14">Generation and policy validation · offline example</text>
+</g></svg>

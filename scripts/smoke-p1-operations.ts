@@ -1,0 +1,30 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { bearerChallenge, protectedResourceMetadata, validateAuthorizationServerMetadata, validateMcpTokenClaims, validateTokenEnvelopeClaims } from "../lib/mcp-oauth-resource";
+import { buildAuthorizeUrl, connectStateExpired, generateConnectState, generatePkcePair } from "../lib/oauth-connect";
+import { normalizeExecutionPolicy, retryDelayMs } from "../lib/runtime/execution-policy";
+import { consumeLocalRetryBudget, resetReliabilityBudgetsForTests } from "../lib/runtime/reliability-control-plane";
+import { providerTemplates } from "../lib/provider-templates";
+
+process.env.MCP_AUTHORIZATION_SERVER_ISSUER="https://identity.example.com/tenant";
+process.env.MCP_RESOURCE_IDENTIFIER="https://runtime.example.com/api/mcp";
+const metadata=protectedResourceMetadata("https://runtime.example.com");assert.equal(metadata?.resource,"https://runtime.example.com/api/mcp");
+assert.match(bearerChallenge("https://runtime.example.com","invalid_token"),/resource_metadata="https:\/\/runtime\.example\.com\/\.well-known\/oauth-protected-resource"/);
+const as={issuer:"https://identity.example.com/tenant",jwks_uri:"https://identity.example.com/jwks",authorization_endpoint:"https://identity.example.com/authorize",token_endpoint:"https://identity.example.com/token",code_challenge_methods_supported:["S256"],grant_types_supported:["authorization_code"]};
+validateAuthorizationServerMetadata(as,"https://identity.example.com/tenant");
+assert.throws(()=>validateAuthorizationServerMetadata({...as,issuer:"https://evil.example"},"https://identity.example.com/tenant"),/issuer mismatch/);
+assert.throws(()=>validateAuthorizationServerMetadata({...as,jwks_uri:"https://evil.example/jwks"},as.issuer),/metadata host mismatch/);
+const now=Date.now();validateTokenEnvelopeClaims({iss:as.issuer,aud:"https://runtime.example.com/api/mcp",exp:Math.ceil(now/1000)+60},as.issuer,"https://runtime.example.com/api/mcp",now);
+assert.throws(()=>validateTokenEnvelopeClaims({iss:as.issuer,aud:["https://runtime.example.com/api/mcp","other"],exp:Math.ceil(now/1000)+60},as.issuer,"https://runtime.example.com/api/mcp",now),/audience mismatch/);
+validateMcpTokenClaims({sub:"user-1",scope:"mcp:tools",astrail_tenant_id:"tenant-1"},"tenant-1");
+assert.throws(()=>validateMcpTokenClaims({sub:"user-1",scope:"mcp:tools",astrail_tenant_id:"tenant-2"},"tenant-1"),/tenant mismatch/);
+const pkce=generatePkcePair();assert.match(pkce.verifier,/^[A-Za-z0-9_-]{43}$/);assert.equal(pkce.challenge.length,43);
+const stateA=generateConnectState(),stateB=generateConnectState();assert.notEqual(stateA,stateB);assert.equal(connectStateExpired(new Date(now-1).toISOString(),now),true);
+const authorize=buildAuthorizeUrl({authorizationUrl:"https://identity.example.com/authorize",clientId:"registered-client",redirectUri:"https://runtime.example.com/api/oauth/callback",state:stateA,scopes:["mcp:tools"],codeChallenge:pkce.challenge});
+assert.equal(authorize.searchParams.get("response_type"),"code");assert.equal(authorize.searchParams.get("code_challenge_method"),"S256");assert.equal(authorize.searchParams.get("redirect_uri"),"https://runtime.example.com/api/oauth/callback");
+const callbackSource=readFileSync("app/api/oauth/callback/route.ts","utf8");assert.match(callbackSource,/\.eq\("connect_status", "pending"\)/);assert.match(callbackSource,/\.eq\("connect_state", state\)/);
+const policy=normalizeExecutionPolicy({base_delay_ms:100,max_attempts:3});assert.equal(retryDelayMs(policy,2,null,()=>0),0);assert.equal(retryDelayMs(policy,2,null,()=>1),200);
+resetReliabilityBudgetsForTests();const dimension={tenantId:"tenant",provider:"github",credentialId:"credential"};for(let i=0;i<20;i+=1)assert.equal(consumeLocalRetryBudget(dimension),true);assert.equal(consumeLocalRetryBudget(dimension),false);
+const executeSource=readFileSync("lib/runtime/execute-tool.ts","utf8");assert.match(executeSource,/retryWrites && idempotencyKey/);assert.match(executeSource,/consumeProviderRetryBudget/);
+assert.deepEqual(providerTemplates.map((item)=>item.id),["github","slack","google","stripe","xero"]);for(const item of providerTemplates){assert.equal(item.publicClientPkce,"S256");for(const url of [item.authorizationUrl,item.tokenUrl,item.revocationUrl,item.healthUrl])assert.equal(new URL(url.replace("{client_id}","client")).protocol,"https:");}
+console.log("P1 OAuth, reliability, and provider lifecycle smoke checks passed.");

@@ -1,0 +1,28 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Swagger Petstore Eval",
+    "description": "Small Petstore fixture used by the Astrail MCP Code Mode eval harness.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://petstore.swagger.io/v2"
+    }
+  ],
+  "paths": {
+    "/store/inventory": {
+      "get": {
+        "operationId": "getInventory",
+        "summary": "List inventory",
+        "description": "Returns pet inventory counts by status from the public Petstore demo API.",
+        "tags": ["store"],
+        "responses": {
+          "200": {
+            "description": "Inventory counts by status."
+          }
+        }
+      }
+    }
+  }
+}

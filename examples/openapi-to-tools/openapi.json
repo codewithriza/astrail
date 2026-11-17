@@ -1,0 +1,35 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Notes API", "version": "1.0.0" },
+  "servers": [{ "url": "https://notes.example.com" }],
+  "paths": {
+    "/notes": {
+      "get": {
+        "operationId": "listNotes",
+        "summary": "List notes",
+        "responses": { "200": { "description": "Notes returned" } }
+      },
+      "post": {
+        "operationId": "createNote",
+        "summary": "Create a note",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": {
+            "type": "object",
+            "required": ["title"],
+            "properties": { "title": { "type": "string" } }
+          } } }
+        },
+        "responses": { "201": { "description": "Note created" } }
+      }
+    },
+    "/notes/{id}": {
+      "delete": {
+        "operationId": "deleteNote",
+        "summary": "Delete a note",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "204": { "description": "Note deleted" } }
+      }
+    }
+  }
+}
