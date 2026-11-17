@@ -1,0 +1,9 @@
+.git
+.next
+node_modules
+.tmp
+.pnpm-store
+*.log
+.env*
+tests
+reports

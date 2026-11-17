@@ -1,0 +1,13 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#0B0B0B"/>
+  <rect x="70" y="70" width="1060" height="535" rx="32" fill="#111111" stroke="#2A2A2A" stroke-width="2"/>
+  <text x="110" y="160" fill="white" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="52" font-weight="800">MCP SDK vs endpoint</text>
+  <text x="110" y="216" fill="#A3A3A3" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="27">Prototype fast, own the code when it matters</text>
+  <rect x="115" y="310" width="425" height="185" rx="28" fill="#18181B" stroke="#3F3F46"/>
+  <text x="160" y="380" fill="#F97316" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="31" font-weight="800">Hosted endpoint</text>
+  <text x="160" y="431" fill="#E5E7EB" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="23">connect, test, watch logs</text>
+  <rect x="660" y="310" width="425" height="185" rx="28" fill="#FFF7ED" stroke="#FDBA74"/>
+  <text x="705" y="380" fill="#9A3412" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="31" font-weight="800">SDK export</text>
+  <text x="705" y="431" fill="#111827" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="23">code, docs, tests, CI</text>
+  <path d="M562 404H638" stroke="#F97316" stroke-width="7" stroke-linecap="round"/>
+</svg>

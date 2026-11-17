@@ -1,0 +1,10 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Astrail mark</title>
+  <desc>A white geometric triangular Astrail symbol with two rising negative-space cuts.</desc>
+  <path
+    fill="#FFFFFF"
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M256 48L456 416H56L256 48ZM241 229L259 306L225 373H164L241 229ZM259 168L349 373H287L259 306V168Z"
+  />
+</svg>

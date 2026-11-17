@@ -1,0 +1,18 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="#0A0A0A"/>
+  <rect x="70" y="70" width="1060" height="535" rx="32" fill="#111111" stroke="#2E2E2E" stroke-width="2"/>
+  <circle cx="187" cy="182" r="54" fill="#F97316"/>
+  <path d="M187 145L218 199H156L187 145Z" fill="white"/>
+  <text x="270" y="175" fill="white" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="58" font-weight="800">What is an MCP server?</text>
+  <text x="270" y="236" fill="#BDBDBD" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="28">A standard tool interface for AI agents</text>
+  <rect x="150" y="330" width="230" height="105" rx="20" fill="#1C1C1C" stroke="#3A3A3A"/>
+  <text x="188" y="392" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="27">agent</text>
+  <rect x="485" y="305" width="230" height="155" rx="24" fill="#FFF7ED" stroke="#FDBA74" stroke-width="2"/>
+  <text x="535" y="370" fill="#9A3412" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="28" font-weight="800">MCP</text>
+  <text x="526" y="415" fill="#111111" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">tools/list</text>
+  <rect x="820" y="330" width="230" height="105" rx="20" fill="#1C1C1C" stroke="#3A3A3A"/>
+  <text x="866" y="392" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="27">API</text>
+  <path d="M390 383H470" stroke="#F97316" stroke-width="6" stroke-linecap="round"/>
+  <path d="M730 383H810" stroke="#F97316" stroke-width="6" stroke-linecap="round"/>
+  <text x="150" y="545" fill="#F97316" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" font-weight="800">Astrail</text>
+</svg>
