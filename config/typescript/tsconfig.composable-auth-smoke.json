@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "../../.tmp/composable-auth",
+    "baseUrl": "../../.",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "../../scripts/smoke-composable-auth-lifecycle.ts",
+    "../../lib/runtime/token-lifecycle.ts",
+    "../../lib/runtime/composable-authorization.ts",
+    "../../lib/runtime/permissions.ts",
+    "../../lib/runtime/oauth-security.ts",
+    "../../lib/agent-tool-profile.ts",
+    "../../lib/types.ts"
+  ]
+}

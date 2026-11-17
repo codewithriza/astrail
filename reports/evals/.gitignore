@@ -1,0 +1,4 @@
+mcp-code-mode-*.json
+mcp-code-mode-*.md
+!mcp-code-mode-latest.json
+!mcp-code-mode-latest.md

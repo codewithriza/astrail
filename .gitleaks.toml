@@ -1,0 +1,14 @@
+title = "Astrail secret scanning"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Exact synthetic values in redaction tests and the refund documentation example"
+regexTarget = "secret"
+regexes = [
+  '^liveApiKey123456$',
+  '^sk-live_abcdefghijkl$',
+  '^eyJhbGciOiJIUzI1NiJ9\.eyJzdWIiOiIxMjM0NTY3ODkwIn0\.signature$',
+  '^refund-ch_123-2026-06-25$',
+]

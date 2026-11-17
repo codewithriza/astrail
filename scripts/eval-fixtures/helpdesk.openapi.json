@@ -1,0 +1,154 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Acme Support Desk Eval",
+    "description": "Realistic support-ticket API fixture backed by Postman Echo for deterministic local MCP evals.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://postman-echo.com"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Acme-API-Key"
+      }
+    }
+  },
+  "paths": {
+    "/get": {
+      "get": {
+        "operationId": "listTickets",
+        "summary": "List support tickets",
+        "description": "Find support tickets by status, assignee, customer, and page size. The eval uses Postman Echo so query arguments can be checked exactly.",
+        "tags": ["tickets"],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "description": "Ticket status to filter by.",
+            "schema": {
+              "type": "string",
+              "enum": ["open", "pending", "closed"],
+              "example": "open"
+            }
+          },
+          {
+            "name": "assignee_id",
+            "in": "query",
+            "required": false,
+            "description": "Support teammate assigned to the ticket.",
+            "schema": {
+              "type": "string",
+              "example": "u_123"
+            }
+          },
+          {
+            "name": "customer_id",
+            "in": "query",
+            "required": false,
+            "description": "Customer account id.",
+            "schema": {
+              "type": "string",
+              "example": "cus_42"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum tickets to return.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "example": 2
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Echoed query arguments for deterministic eval assertions."
+          }
+        }
+      }
+    },
+    "/post": {
+      "post": {
+        "operationId": "createTicket",
+        "summary": "Create support ticket",
+        "description": "Create a new support ticket. The eval sends the body to Postman Echo and checks the echoed JSON fields.",
+        "tags": ["tickets"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "priority", "customer_id"],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Login issue"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "enum": ["low", "normal", "high"],
+                    "example": "high"
+                  },
+                  "customer_id": {
+                    "type": "string",
+                    "example": "cus_42"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Echoed ticket payload."
+          }
+        }
+      }
+    },
+    "/get/{ticket_id}/secret": {
+      "get": {
+        "operationId": "getSensitiveTicket",
+        "summary": "Get sensitive ticket details",
+        "description": "Fetch sensitive ticket details. The eval expects Astrail to stop at auth_required without configured credentials.",
+        "tags": ["tickets"],
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticket_id",
+            "in": "path",
+            "required": true,
+            "description": "Ticket id.",
+            "schema": {
+              "type": "string",
+              "example": "t_123"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sensitive ticket detail."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          }
+        }
+      }
+    }
+  }
+}
